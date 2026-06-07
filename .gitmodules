@@ -1,0 +1,3 @@
+[submodule "jayarasa_app"]
+	path = jayarasa_app
+	url = https://github.com/dedyzhang/kasir_pos.git
