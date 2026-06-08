@@ -1,0 +1,168 @@
+{
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2": {
+    "file": "assets/fa-brands-400-BP5tdqmh.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2": {
+    "file": "assets/fa-regular-400-nyy7hhHF.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2": {
+    "file": "assets/fa-solid-900-DRAAbZTg.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2": {
+    "file": "assets/fa-v4compatibility-DD84SGiu.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-CjzRPbqb.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/img/cash_payment.gif": {
+    "file": "assets/cash_payment-EKdv2ysn.gif",
+    "src": "resources/img/cash_payment.gif"
+  },
+  "resources/img/credit_card_payment.gif": {
+    "file": "assets/credit_card_payment-Cxq5Z9qQ.gif",
+    "src": "resources/img/credit_card_payment.gif"
+  },
+  "resources/img/headers-icon.png": {
+    "file": "assets/headers-icon-D0_1nOpt.png",
+    "src": "resources/img/headers-icon.png"
+  },
+  "resources/img/login/login-image.jpg": {
+    "file": "assets/login-image-BmL6noLa.jpg",
+    "src": "resources/img/login/login-image.jpg"
+  },
+  "resources/img/logo-perusahaan.png": {
+    "file": "assets/logo-perusahaan-_VTvaf4F.png",
+    "src": "resources/img/logo-perusahaan.png"
+  },
+  "resources/img/no_image_available.png": {
+    "file": "assets/no_image_available-_hKXBGa2.png",
+    "src": "resources/img/no_image_available.png"
+  },
+  "resources/img/no_image_available2.png": {
+    "file": "assets/no_image_available2-Ca6Ltfe3.png",
+    "src": "resources/img/no_image_available2.png"
+  },
+  "resources/img/profile/avatar_1.png": {
+    "file": "assets/avatar_1-CrqiHgE8.png",
+    "src": "resources/img/profile/avatar_1.png"
+  },
+  "resources/img/profile/avatar_10.png": {
+    "file": "assets/avatar_10-gekLt9An.png",
+    "src": "resources/img/profile/avatar_10.png"
+  },
+  "resources/img/profile/avatar_11.png": {
+    "file": "assets/avatar_11-DMiuvy8a.png",
+    "src": "resources/img/profile/avatar_11.png"
+  },
+  "resources/img/profile/avatar_12.png": {
+    "file": "assets/avatar_12-cW9tBT3W.png",
+    "src": "resources/img/profile/avatar_12.png"
+  },
+  "resources/img/profile/avatar_13.png": {
+    "file": "assets/avatar_13-Dsjob-TQ.png",
+    "src": "resources/img/profile/avatar_13.png"
+  },
+  "resources/img/profile/avatar_14.png": {
+    "file": "assets/avatar_14-C5VAQZo7.png",
+    "src": "resources/img/profile/avatar_14.png"
+  },
+  "resources/img/profile/avatar_15.png": {
+    "file": "assets/avatar_15-DP3Qd4Y4.png",
+    "src": "resources/img/profile/avatar_15.png"
+  },
+  "resources/img/profile/avatar_16.png": {
+    "file": "assets/avatar_16-D4rRj5RW.png",
+    "src": "resources/img/profile/avatar_16.png"
+  },
+  "resources/img/profile/avatar_17.png": {
+    "file": "assets/avatar_17-BGbZb2C1.png",
+    "src": "resources/img/profile/avatar_17.png"
+  },
+  "resources/img/profile/avatar_18.png": {
+    "file": "assets/avatar_18-CMt5JUwK.png",
+    "src": "resources/img/profile/avatar_18.png"
+  },
+  "resources/img/profile/avatar_19.png": {
+    "file": "assets/avatar_19-D3t9e3tW.png",
+    "src": "resources/img/profile/avatar_19.png"
+  },
+  "resources/img/profile/avatar_2.png": {
+    "file": "assets/boy_2-CEUcue3u.png",
+    "src": "resources/img/profile/avatar_2.png"
+  },
+  "resources/img/profile/avatar_20.png": {
+    "file": "assets/avatar_20-Br8uTYp5.png",
+    "src": "resources/img/profile/avatar_20.png"
+  },
+  "resources/img/profile/avatar_21.png": {
+    "file": "assets/avatar_21-Bl8Y4HzP.png",
+    "src": "resources/img/profile/avatar_21.png"
+  },
+  "resources/img/profile/avatar_22.png": {
+    "file": "assets/avatar_22-DEEnlGRD.png",
+    "src": "resources/img/profile/avatar_22.png"
+  },
+  "resources/img/profile/avatar_3.png": {
+    "file": "assets/avatar_3-DqJOEGkh.png",
+    "src": "resources/img/profile/avatar_3.png"
+  },
+  "resources/img/profile/avatar_4.png": {
+    "file": "assets/avatar_4-wuJHBn4v.png",
+    "src": "resources/img/profile/avatar_4.png"
+  },
+  "resources/img/profile/avatar_5.png": {
+    "file": "assets/avatar_5-CNAgLpM7.png",
+    "src": "resources/img/profile/avatar_5.png"
+  },
+  "resources/img/profile/avatar_6.png": {
+    "file": "assets/avatar_6-CoOnt_P_.png",
+    "src": "resources/img/profile/avatar_6.png"
+  },
+  "resources/img/profile/avatar_7.png": {
+    "file": "assets/avatar_7-yNnhJnbB.png",
+    "src": "resources/img/profile/avatar_7.png"
+  },
+  "resources/img/profile/avatar_8.png": {
+    "file": "assets/avatar_8-Dsu7fwGI.png",
+    "src": "resources/img/profile/avatar_8.png"
+  },
+  "resources/img/profile/avatar_9.png": {
+    "file": "assets/avatar_9-e_o67cxE.png",
+    "src": "resources/img/profile/avatar_9.png"
+  },
+  "resources/img/profile/boy_1.png": {
+    "file": "assets/boy_1-D1lyA9L4.png",
+    "src": "resources/img/profile/boy_1.png"
+  },
+  "resources/img/profile/boy_2.png": {
+    "file": "assets/boy_2-CEUcue3u.png",
+    "src": "resources/img/profile/avatar_2.png"
+  },
+  "resources/img/qris_payment.gif": {
+    "file": "assets/qris_payment-aF0Zkbfz.gif",
+    "src": "resources/img/qris_payment.gif"
+  },
+  "resources/img/start-order.png": {
+    "file": "assets/start-order-BBRl8uOv.png",
+    "src": "resources/img/start-order.png"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-h4M4S5LK.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "css": [
+      "assets/app-CmLKHimZ.css"
+    ]
+  }
+}
