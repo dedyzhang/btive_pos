@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&family=Red+Hat+Text:ital,wght@0,300..700;1,300..700&display=swap');
+@import 'tailwindcss';
+@theme {
+  --color-brand: #2b66ff;
+  --color-brand-soft: #ecf2fe;
+  --color-brand-softer: #f5f8ff;
+  --color-brand-subtle: #e0ebff;
+  --color-brand-medium: #a5c8ff;
+  --color-brand-light: #4c8cff;
+  --color-brand-strong: #1d4ed8;
+  --color-fg-brand: #2b66ff;
+  --color-fg-brand-strong: #1e40af;
+  --color-accent-yellow: #ffd000;
+}
+@custom-variant dark (&:where(.dark, .dark *));
+@import "flowbite/src/themes/default";
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import "jquery-confirm/css/jquery-confirm.css";
+@import './loading.css';
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+@source "../views";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+
+/* @theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+} */
+
+@media print {
+    @page { margin: 0; padding: 0; size: 58mm; }
+    body {
+        visibility: hidden;
+        margin: 0;
+        padding: 0;
+        width: 58mm;
+        font-size: 14px;
+    }
+    #print-report {
+        visibility: visible;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    #print-report .print-button {
+        display: none;
+    }
+    #print-report table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    #print-report table, #print-report th, #print-report td {
+        padding: 2px 5px;
+        font-size: 11px;
+    }
+    #printreceiptcheck {
+        visibility: visible;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    #printreceiptcheck .print-receipt:last-child {
+        page-break-after: auto !important;
+        color: blue !important;
+    }
+    #printreceiptcheck-iframe {
+        background: black !important;
+    }
+}
+
+body, .bg-gray-100 {
+    font-family: "Red Hat Text", sans-serif;
+    letter-spacing: 0.5px;
+    zoom: 0.9;
+    background-color: #f4f7fc !important; /* Premium clean ice-blue backdrop */
+}
+.wrapper-table {
+    overflow-x: auto !important;
+}
+.dt-layout-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.dt-layout-row.dt-layout-table {
+    display: block;
+}
+.dt-layout-cell select {
+    background: #fff;
+    border-radius: 5px;
+    margin-right: 5px;
+    outline: none;
+    padding: 5px 10px;
+    width: 100px;
+    border: 1px solid #cdcdcd;
+}
+.dt-layout-cell select:focus {
+    border-color: blue;
+}
+.dt-search label {
+    margin-right: 5px;
+}
+.dt-search input {
+    background: #fff;
+    border-radius: 5px;
+    outline: none;
+    padding: 5px 10px;
+    width: 200px;
+    border: 1px solid #cdcdcd;
+}
+.dt-paging button {
+    background: #fff;
+    outline: none;
+    border-right: 1px solid #cdcdcd ;
+    border-left: none;
+    padding: 5px 10px;
+    border-top: 1px solid #cdcdcd ;
+    border-bottom: 1px solid #cdcdcd ;
+}
+.dt-paging button:hover {
+    background: #f0f0f0;
+}
+.dt-paging button:disabled {
+    background: #e0e0e0;
+    cursor: not-allowed;
+}
+.dt-paging button.first {
+    border-radius: 5px 0 0 5px;
+    border-left: 1px solid #cdcdcd ;
+}
+.dt-paging button.last {
+    border-radius: 0 5px 5px 0;
+}
+
+.jconfirm-box {
+    width: 300px !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-brand-medium);
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand);
+}
+
+/* Premium Micro-animations & Interactive States */
+.product-item {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.product-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -8px rgba(43, 102, 255, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: var(--color-brand-medium);
+}
+.order-item.customer {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.order-item.customer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -6px rgba(0, 0, 0, 0.1);
+}
+.categories-list label {
+    transition: all 0.2s ease-in-out;
+}
+.categories-list label:hover {
+    transform: scale(1.02);
+}
