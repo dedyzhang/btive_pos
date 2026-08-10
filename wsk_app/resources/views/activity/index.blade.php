@@ -962,25 +962,30 @@
     </script>
 
     {{-- Auto-open the transaction detail modal when arriving from a push notification
-         (e.g. "?transaction=<uuid>" from the payment-success FCM notification). --}}
+         (e.g. "?transaction=<uuid>" from the payment-success FCM notification).
+         Pure vanilla JS on purpose — must not depend on jQuery having loaded yet, since
+         this page's other scripts assume $ is already defined by the time they run. --}}
     <script>
-        $(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             var params = new URLSearchParams(window.location.search);
             var targetUuid = params.get('transaction');
             if (!targetUuid) return;
 
             // The transaction is paid by the time this notification fires, so it belongs
             // on the "Lunas (Paid)" tab; fall back to "Semua Antrean" just in case.
-            document.getElementById('paid-tab')?.click();
+            var paidTab = document.getElementById('paid-tab');
+            if (paidTab) paidTab.click();
 
             setTimeout(function() {
-                var target = $('li[data-uuid="' + targetUuid + '"] .see-transaction').first();
-                if (target.length === 0) {
-                    document.getElementById('all-tab')?.click();
-                    target = $('li[data-uuid="' + targetUuid + '"] .see-transaction').first();
+                var selector = 'li[data-uuid="' + targetUuid + '"] .see-transaction';
+                var target = document.querySelector(selector);
+                if (!target) {
+                    var allTab = document.getElementById('all-tab');
+                    if (allTab) allTab.click();
+                    target = document.querySelector(selector);
                 }
-                if (target.length > 0) {
-                    target.trigger('click');
+                if (target) {
+                    target.click();
                 }
 
                 // Don't reopen the modal if the page is refreshed afterwards.
