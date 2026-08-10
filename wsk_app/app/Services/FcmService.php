@@ -9,7 +9,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
-use Kreait\Firebase\Messaging\Notification as FcmNotification;
 use Throwable;
 
 class FcmService
@@ -31,13 +30,15 @@ class FcmService
 
             $totalFormatted = 'Rp ' . number_format((float) $transaction->total, 0, ',', '.');
 
+            // Data-only message (no `withNotification`): this guarantees our
+            // FirebaseMessagingService.onMessageReceived() always runs — including when
+            // the app is backgrounded or fully killed — so the click action reliably
+            // opens the right page instead of falling back to the OS default launcher.
             $message = CloudMessage::new()
-                ->withNotification(FcmNotification::create(
-                    'Pembayaran Berhasil',
-                    "Order {$transaction->invoice_number} - {$totalFormatted} telah dibayar"
-                ))
                 ->withData([
                     'type' => 'payment_success',
+                    'title' => 'Pembayaran Berhasil',
+                    'body' => "Order {$transaction->invoice_number} - {$totalFormatted} telah dibayar",
                     'transaction_uuid' => $transaction->uuid,
                     'invoice_number' => (string) $transaction->invoice_number,
                     'total' => (string) $transaction->total,
@@ -70,12 +71,10 @@ class FcmService
             $totalFormatted = 'Rp ' . number_format((float) $totalRevenue, 0, ',', '.');
 
             $message = CloudMessage::new()
-                ->withNotification(FcmNotification::create(
-                    'Laporan Pendapatan Hari Ini',
-                    "Total pendapatan hari ini: {$totalFormatted} dari {$transactionCount} transaksi"
-                ))
                 ->withData([
                     'type' => 'daily_revenue',
+                    'title' => 'Laporan Pendapatan Hari Ini',
+                    'body' => "Total pendapatan hari ini: {$totalFormatted} dari {$transactionCount} transaksi",
                     'total' => (string) $totalRevenue,
                     'transaction_count' => (string) $transactionCount,
                     'click_action' => route('activity.report'),
@@ -105,12 +104,10 @@ class FcmService
                 : ($transaction->table->name ?? 'Dine In');
 
             $message = CloudMessage::new()
-                ->withNotification(FcmNotification::create(
-                    'Pesanan Baru Masuk',
-                    "Pesanan baru dari {$orderLabel} ({$transaction->invoice_number})"
-                ))
                 ->withData([
                     'type' => 'new_order',
+                    'title' => 'Pesanan Baru Masuk',
+                    'body' => "Pesanan baru dari {$orderLabel} ({$transaction->invoice_number})",
                     'transaction_uuid' => $transaction->uuid,
                     'invoice_number' => (string) $transaction->invoice_number,
                     'click_action' => route('kitchen.queue', ['transaction' => $transaction->uuid]),

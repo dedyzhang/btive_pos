@@ -551,9 +551,10 @@
 
     {{-- Scroll to + briefly highlight the order that triggered a "Pesanan Baru Masuk" push
          notification (e.g. "?transaction=<uuid>"). Cards render async via live-updates polling,
-         so poll for it instead of assuming it's already in the DOM. --}}
+         so poll for it instead of assuming it's already in the DOM.
+         Pure vanilla JS on purpose — must not depend on jQuery having loaded yet. --}}
     <script>
-        $(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             var params = new URLSearchParams(window.location.search);
             var targetUuid = params.get('transaction');
             if (!targetUuid) return;
@@ -563,14 +564,14 @@
 
             var poll = setInterval(function() {
                 attempts++;
-                var $card = $('.order-card[data-uuid="' + targetUuid + '"]');
+                var card = document.querySelector('.order-card[data-uuid="' + targetUuid + '"]');
 
-                if ($card.length > 0) {
+                if (card) {
                     clearInterval(poll);
-                    $card[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    $card.addClass('highlight-target-card');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    card.classList.add('highlight-target-card');
                     setTimeout(function() {
-                        $card.removeClass('highlight-target-card');
+                        card.classList.remove('highlight-target-card');
                     }, 5000);
                 } else if (attempts >= maxAttempts) {
                     clearInterval(poll);
