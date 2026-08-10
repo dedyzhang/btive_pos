@@ -512,6 +512,42 @@
 
         <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
+                <p class="text-lg font-bold">Notifikasi Laporan Pendapatan Harian</p>
+                <p class="text-sm">Kirim notifikasi total pendapatan hari ini ke HP admin pada jam tertentu</p>
+            </div>
+            @if(session('success_daily_revenue'))
+            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-4 text-sm text-fg-success-strong rounded-base bg-success-soft" role="alert">
+                <i class="me-2 mt-0.5 sm:mt-0 fas fa-check"></i>
+                <p><span class="font-medium me-1">Sukses!</span> {{session('success_daily_revenue')}}</p>
+            </div>
+            @endif
+            <div class="col-span-1">
+                @php
+                    $settingDailyRevenue = $settings->first(function($item) {
+                        return $item->jenis == 'daily_revenue_notification';
+                    });
+                    $dailyRevenueData = $settingDailyRevenue && $settingDailyRevenue->nilai ? (@unserialize($settingDailyRevenue->nilai) ?: []) : [];
+                @endphp
+                <form method="POST" action="{{ route('settings.notification.daily-revenue.update') }}">
+                    @csrf
+                    <label class="flex items-center gap-2 cursor-pointer select-none mb-3">
+                        <input type="checkbox" name="enabled" value="1" class="w-4 h-4 rounded border-gray-300 text-brand focus:ring-brand" {{ old('enabled', $dailyRevenueData['enabled'] ?? false) ? 'checked' : '' }}>
+                        <span class="text-sm font-medium text-gray-700">Aktifkan notifikasi</span>
+                    </label>
+
+                    <p class="text-base mb-1">Jam Kirim Notifikasi</p>
+                    <input type="time" name="time" class="w-full px-5 py-3 rounded focus:outline-none @error('time') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('time', $dailyRevenueData['time'] ?? '21:00') }}" id="daily_revenue_time">
+                    @error('time')
+                        <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+
+                    <button type="submit" class="w-full bg-brand-light hover:bg-brand-strong text-white font-medium py-2 px-4 cursor-pointer rounded-base w-full sm:w-auto mt-3"><i class="fas fa-save"></i> Simpan Pengaturan</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
                 <p class="text-lg font-bold">Aplikasi Android (APK)</p>
                 <p class="text-sm">Unggah file APK agar bisa diunduh pengguna langsung dari halaman login</p>
             </div>

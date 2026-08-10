@@ -187,7 +187,7 @@
         </div>
 
         <!-- Bottom Section: Sleek Logout Button -->
-        <div class="logout-button-place w-full p-4 shrink-0 border-t border-gray-100 mt-auto">
+        <div class="logout-button-wrapper w-full p-4 shrink-0 border-t border-gray-100 mt-auto">
             <button class="w-full group hover:bg-red-50 bg-gray-50 hover:text-red-600 text-gray-600 border border-gray-100 flex items-center justify-center gap-2.5 rounded-xl py-2.5 px-4 cursor-pointer transition-all duration-300 logout-button-place outline-none">
                 <i class="fas fa-sign-out text-sm text-red-400 group-hover:text-red-500 transition-colors"></i>
                 <span class="text-xs font-bold tracking-wide">Logout</span>

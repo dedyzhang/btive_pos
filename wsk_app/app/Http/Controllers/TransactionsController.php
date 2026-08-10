@@ -290,6 +290,8 @@ class TransactionsController extends Controller
                 'tax' => $tax,
                 'total' => $totalwithtax
             ]);
+
+            app(FcmService::class)->notifyNewOrder($transaction);
         }
         return response()->json(['success' => true]);
     }

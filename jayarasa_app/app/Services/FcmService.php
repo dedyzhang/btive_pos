@@ -41,12 +41,84 @@ class FcmService
                     'transaction_uuid' => $transaction->uuid,
                     'invoice_number' => (string) $transaction->invoice_number,
                     'total' => (string) $transaction->total,
-                    'click_action' => route('transaction.print.payment', $transaction->uuid),
+                    'click_action' => route('activity.index', ['transaction' => $transaction->uuid]),
                 ]);
 
             $this->sendToTokens($tokens, $message);
         } catch (Throwable $e) {
             Log::error('FCM notifyPaymentSuccess failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify all registered admin devices of today's total revenue so far. Meant to be
+     * triggered by the scheduled `report:send-daily-revenue` command, but safe to call anytime.
+     */
+    public function notifyDailyRevenue(): void
+    {
+        try {
+            $tokens = DeviceToken::whereIn('user_id', $this->adminUserIds())->pluck('fcm_token', 'id');
+
+            if ($tokens->isEmpty()) {
+                return;
+            }
+
+            $paidToday = Transactions::where('status', 'paid')->whereDate('paid_at', now()->toDateString());
+            $totalRevenue = (clone $paidToday)->sum('total');
+            $transactionCount = (clone $paidToday)->count();
+
+            $totalFormatted = 'Rp ' . number_format((float) $totalRevenue, 0, ',', '.');
+
+            $message = CloudMessage::new()
+                ->withNotification(FcmNotification::create(
+                    'Laporan Pendapatan Hari Ini',
+                    "Total pendapatan hari ini: {$totalFormatted} dari {$transactionCount} transaksi"
+                ))
+                ->withData([
+                    'type' => 'daily_revenue',
+                    'total' => (string) $totalRevenue,
+                    'transaction_count' => (string) $transactionCount,
+                    'click_action' => route('activity.report'),
+                ]);
+
+            $this->sendToTokens($tokens, $message);
+        } catch (Throwable $e) {
+            Log::error('FCM notifyDailyRevenue failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify cashier and kitchen devices that a new order has come in (currently: a customer
+     * self-order via QR code — the one case where neither of them created the order themselves).
+     */
+    public function notifyNewOrder(Transactions $transaction): void
+    {
+        try {
+            $tokens = DeviceToken::whereIn('user_id', $this->cashierAndKitchenUserIds())->pluck('fcm_token', 'id');
+
+            if ($tokens->isEmpty()) {
+                return;
+            }
+
+            $orderLabel = $transaction->order_type === 'take_away'
+                ? 'Take Away'
+                : ($transaction->table->name ?? 'Dine In');
+
+            $message = CloudMessage::new()
+                ->withNotification(FcmNotification::create(
+                    'Pesanan Baru Masuk',
+                    "Pesanan baru dari {$orderLabel} ({$transaction->invoice_number})"
+                ))
+                ->withData([
+                    'type' => 'new_order',
+                    'transaction_uuid' => $transaction->uuid,
+                    'invoice_number' => (string) $transaction->invoice_number,
+                    'click_action' => route('kitchen.queue', ['transaction' => $transaction->uuid]),
+                ]);
+
+            $this->sendToTokens($tokens, $message);
+        } catch (Throwable $e) {
+            Log::error('FCM notifyNewOrder failed: ' . $e->getMessage());
         }
     }
 
@@ -64,6 +136,22 @@ class FcmService
         return User::where('role', 'admin')
             ->orWhereIn('role', $adminRoleNames)
             ->pluck('uuid');
+    }
+
+    /**
+     * Resolve every user id with cashier or kitchen access — the literal 'cashier'/'kasir'/'dapur'
+     * roles plus any custom role granted access_cashier or view_kitchen_queue.
+     */
+    private function cashierAndKitchenUserIds()
+    {
+        $roleNames = Role::all()
+            ->filter(fn ($role) => in_array('access_cashier', $role->permissions ?? [])
+                || in_array('view_kitchen_queue', $role->permissions ?? []))
+            ->pluck('name')
+            ->push('cashier', 'kasir', 'dapur')
+            ->unique();
+
+        return User::whereIn('role', $roleNames)->pluck('uuid');
     }
 
     private function sendToTokens($tokens, CloudMessage $message): void

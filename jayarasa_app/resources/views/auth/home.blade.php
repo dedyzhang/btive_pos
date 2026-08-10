@@ -1101,8 +1101,39 @@
                 </div>
             </div>
         </div>
-        <div class="standby-form flex justify-center items-center h-full">
-            <img src="{{ Vite::asset('resources/img/start-order.png') }}" class="w-full h-auto" />
+        <div class="standby-form flex flex-col h-full">
+            @php
+                $occupiedTableIds = $transactions->pluck('table_id')->filter()->unique()->toArray();
+                $emptyTables = $tables->whereNotIn('uuid', $occupiedTableIds);
+            @endphp
+            <div class="px-4 pt-5 pb-3 border-b border-gray-100 shrink-0">
+                <p class="text-sm font-bold text-gray-700">Mulai Order Baru</p>
+                <p class="text-xs text-gray-400 mt-0.5">Pilih meja kosong untuk langsung mulai, atau pesan tanpa meja.</p>
+            </div>
+            <div id="standby-tables" class="flex-1 overflow-y-auto p-4">
+                @if($emptyTables->count() > 0)
+                    <div class="grid grid-cols-2 gap-2.5">
+                        @foreach($emptyTables as $table)
+                            <button type="button" class="quick-table-card flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-gray-200 bg-gray-50 hover:border-brand hover:bg-brand-soft transition-all cursor-pointer" data-table-uuid="{{ $table->uuid }}">
+                                <span class="w-8 h-8 rounded-full {{ $table->color }} flex items-center justify-center text-white text-xs shrink-0">
+                                    <i class="fas fa-chair"></i>
+                                </span>
+                                <span class="text-xs font-semibold text-gray-700 truncate w-full text-center">{{ $table->name }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="flex flex-col items-center justify-center text-center py-8">
+                        <span class="w-12 h-12 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center mb-3"><i class="fas fa-chair text-lg"></i></span>
+                        <p class="text-xs text-gray-500 font-medium">Semua meja sedang terisi</p>
+                    </div>
+                @endif
+            </div>
+            <div class="p-4 border-t border-gray-100 shrink-0">
+                <button type="button" class="add-order-button w-full py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold text-sm cursor-pointer">
+                    <i class="fas fa-bag-shopping mr-1.5"></i> Take Away / Tanpa Meja
+                </button>
+            </div>
         </div>
     </div>
     @endif
@@ -1281,20 +1312,28 @@
                 toggleShortcutGuideModal();
             }
             
-            // ESC: Close Modals
+            // ESC: Close Modals (or, if none are open, close the active order form)
             if (e.key === 'Escape') {
+                var anyModalOpen = $('#modal-preview-products, #modal-edit-transaction, #modal-edit-order, #modal-add-manual-item, #modal-direct-payment, #modal-direct-payment-success, #modal-shortcut-guide, #modal-attendance')
+                    .filter(function() { return !$(this).hasClass('hidden'); }).length > 0;
+
                 if (!$('#modal-shortcut-guide').hasClass('hidden')) {
                     closeShortcutGuideModal();
                 }
-                
+
                 if (typeof modal !== 'undefined') modal.hide();
                 if (typeof modal2 !== 'undefined') modal2.hide();
                 if (typeof modal3 !== 'undefined') modal3.hide();
                 if (typeof modalManual !== 'undefined') modalManual.hide();
                 if (typeof dpModal !== 'undefined') dpModal.hide();
                 if (typeof dpsModal !== 'undefined') dpsModal.hide();
-                
+
                 $('#modal-attendance').addClass('hidden');
+
+                // Tidak ada modal yang sedang terbuka — anggap ESC sebagai "tutup order, kembali ke pemilihan meja"
+                if (!anyModalOpen && !$('.order-form').hasClass('hidden')) {
+                    closeOrderForm();
+                }
             }
         });
 
@@ -1453,6 +1492,15 @@
         function closeMobileSidebar() {
             $('.order-container').removeClass('active');
             $('.open-close-order').removeClass('active');
+        }
+
+        // Helper: tutup form order aktif, kembali ke tampilan pemilihan meja (standby)
+        function closeOrderForm() {
+            $('.order-form').addClass('hidden');
+            $('.standby-form').removeClass('hidden');
+            $('.order-container').removeClass('active');
+            $('.open-close-order').removeClass('active');
+            $('#order .customer').removeClass('bg-brand-soft');
         }
 
         // Helper: hitung ulang total keranjang dari semua item data-subtotal
@@ -1671,8 +1719,8 @@
             }
             // console.log('a');
         });
-        // Tombol tambah order
-        $('.add-order-button').on('click',function() {
+        // Tombol tambah order (opsional: langsung set meja, dipakai oleh quick-table-card)
+        function startNewOrder(presetTableUuid) {
             loading();
             $.ajax({
                 type: "POST",
@@ -1689,10 +1737,17 @@
                     $('#transaction-id').val(transaction.uuid);
                     $('.order-form-id').text("Order ID #"+transaction.invoice_number);
                     
-                    _isSyncing = true;
-                    $('#meja').val("");
-                    $('#orderType').val("");
-                    _isSyncing = false;
+                    if (presetTableUuid) {
+                        // Langsung set meja & tipe order, lalu trigger change supaya
+                        // tersimpan ke backend lewat handler #meja/#orderType yang sudah ada.
+                        $('#meja').val(presetTableUuid).trigger('change');
+                        $('#orderType').val('dine_in').trigger('change');
+                    } else {
+                        _isSyncing = true;
+                        $('#meja').val("");
+                        $('#orderType').val("");
+                        _isSyncing = false;
+                    }
 
                     _currentCartJson = JSON.stringify([]);
                     $('.product-item-list').html('');
@@ -1746,6 +1801,14 @@
                 }
 
             });
+        }
+
+        $('.add-order-button').on('click', function() {
+            startNewOrder();
+        });
+
+        $('#standby-tables').on('click', '.quick-table-card', function() {
+            startNewOrder($(this).data('table-uuid'));
         });
 
         // Toggle Tampilan Menu/Item di Kartu Antrian

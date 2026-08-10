@@ -549,12 +549,46 @@
         }
     </script>
 
+    {{-- Scroll to + briefly highlight the order that triggered a "Pesanan Baru Masuk" push
+         notification (e.g. "?transaction=<uuid>"). Cards render async via live-updates polling,
+         so poll for it instead of assuming it's already in the DOM. --}}
+    <script>
+        $(function() {
+            var params = new URLSearchParams(window.location.search);
+            var targetUuid = params.get('transaction');
+            if (!targetUuid) return;
+
+            var attempts = 0;
+            var maxAttempts = 10; // ~5s at 500ms interval
+
+            var poll = setInterval(function() {
+                attempts++;
+                var $card = $('.order-card[data-uuid="' + targetUuid + '"]');
+
+                if ($card.length > 0) {
+                    clearInterval(poll);
+                    $card[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    $card.addClass('highlight-target-card');
+                    setTimeout(function() {
+                        $card.removeClass('highlight-target-card');
+                    }, 5000);
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(poll);
+                }
+            }, 500);
+
+            var url = new URL(window.location.href);
+            url.searchParams.delete('transaction');
+            window.history.replaceState({}, '', url);
+        });
+    </script>
+
     <!-- Custom CSS inside container -->
     <style>
         .active-filter {
             box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25) !important;
         }
-        
+
         .pulse-card {
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1) !important;
             animation: pulse-border 2s infinite ease-in-out;
@@ -568,6 +602,22 @@
             50% {
                 border-color: rgba(239, 68, 68, 0.6);
                 box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.2) !important;
+            }
+        }
+
+        .highlight-target-card {
+            box-shadow: 0 0 0 2px rgba(43, 102, 255, 0.15) !important;
+            animation: pulse-border-brand 1.4s infinite ease-in-out;
+        }
+
+        @keyframes pulse-border-brand {
+            0%, 100% {
+                border-color: rgba(43, 102, 255, 0.3);
+                box-shadow: 0 0 0 2px rgba(43, 102, 255, 0.08) !important;
+            }
+            50% {
+                border-color: rgba(43, 102, 255, 0.7);
+                box-shadow: 0 0 0 6px rgba(43, 102, 255, 0.22) !important;
             }
         }
     </style>

@@ -9,6 +9,7 @@ use App\Models\Transactions;
 use App\Models\TransactionDetails;
 use App\Models\Settings;
 use App\Models\User;
+use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -130,6 +131,8 @@ class CustomerOrderController extends Controller
             ]);
 
             DB::commit();
+
+            app(FcmService::class)->notifyNewOrder($transaction);
 
             return response()->json([
                 'success' => true,

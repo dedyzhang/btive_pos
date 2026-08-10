@@ -62,10 +62,16 @@
         <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-brand to-transparent"></div>
         
         <!-- Logo Area -->
-        <div class="relative w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-tr from-brand to-indigo-500 flex items-center justify-center shadow-lg shadow-brand/20 mb-4 md:mb-5 relative group">
+        @php
+            $loginRestaurantLogo = \App\Models\Settings::where('jenis', 'restaurant_logo')->first();
+            $loginLogoUrl = ($loginRestaurantLogo && $loginRestaurantLogo->nilai)
+                ? asset('storage/' . $loginRestaurantLogo->nilai)
+                : Vite::asset('resources/img/logo-icon.png');
+        @endphp
+        <div class="relative w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center shadow-lg shadow-brand/10 mb-4 md:mb-5 relative group p-2.5">
             <!-- Pulsing outer ring -->
             <div class="absolute inset-0 rounded-2xl bg-brand/10 animate-ping pointer-events-none"></div>
-            <i class="fas fa-cash-register text-white text-xl md:text-2xl"></i>
+            <img src="{{ $loginLogoUrl }}" class="w-full h-full object-contain" alt="Logo">
         </div>
 
         <span class="text-[9px] md:text-[10px] text-brand font-black uppercase tracking-widest mb-1">Sistem POS Kasir</span>
@@ -107,8 +113,7 @@
                         
                         <!-- Toggle show/hide button -->
                         <button type="button" id="btn-toggle-login-password" class="absolute inset-y-0 right-0 pr-4 md:pr-5 flex items-center text-slate-400 hover:text-brand transition-all cursor-pointer border-none outline-none select-none">
-                            <i class="fas fa-eye text-xs icon-eye"></i>
-                            <i class="fas fa-eye-slash text-xs icon-eye-slash hidden"></i>
+                            <i class="fas fa-eye text-xs" id="icon-toggle-login-password"></i>
                         </button>
                     </div>
                     @error('password')
@@ -147,21 +152,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             const btnToggle = document.getElementById('btn-toggle-login-password');
             const passwordInput = document.getElementById('password');
-            
-            if (btnToggle && passwordInput) {
+            const icon = document.getElementById('icon-toggle-login-password');
+
+            if (btnToggle && passwordInput && icon) {
                 btnToggle.addEventListener('click', function() {
-                    const iconEye = btnToggle.querySelector('.icon-eye');
-                    const iconEyeSlash = btnToggle.querySelector('.icon-eye-slash');
-                    
-                    if (passwordInput.type === 'password') {
-                        passwordInput.type = 'text';
-                        iconEye.classList.add('hidden');
-                        iconEyeSlash.classList.remove('hidden');
-                    } else {
-                        passwordInput.type = 'password';
-                        iconEye.classList.remove('hidden');
-                        iconEyeSlash.classList.add('hidden');
-                    }
+                    const showing = passwordInput.type === 'text';
+                    passwordInput.type = showing ? 'password' : 'text';
+                    icon.classList.toggle('fa-eye', showing);
+                    icon.classList.toggle('fa-eye-slash', !showing);
                 });
             }
         });

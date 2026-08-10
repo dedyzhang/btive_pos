@@ -134,6 +134,25 @@ class SettingsController extends Controller
     }
 
     /**
+     * Notifikasi Laporan Pendapatan Harian - Update
+     */
+    public function dailyRevenueNotificationUpdate(Request $request) {
+        $request->validate([
+            'time' => 'required_if:enabled,1|nullable|date_format:H:i',
+        ]);
+
+        Settings::updateOrCreate(
+            ['jenis' => 'daily_revenue_notification'],
+            ['nilai' => serialize([
+                'enabled' => $request->boolean('enabled'),
+                'time' => $request->time,
+            ])]
+        );
+
+        return redirect()->back()->with('success_daily_revenue', 'Notifikasi Laporan Pendapatan Berhasil Diperbarui');
+    }
+
+    /**
      * Android App (APK) - Upload/Replace
      */
     public function apkUpload(Request $request) {

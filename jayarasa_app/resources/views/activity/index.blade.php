@@ -454,13 +454,15 @@
                             <span class="font-bold text-heading text-sm">TOTAL</span>
                             <span class="font-extrabold text-brand text-lg transaction-detail-total">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center border-t border-dashed border-gray-100 pt-2 text-[11px]">
-                            <span class="font-semibold text-gray-400">Dibayar (<span class="paid_method font-bold text-brand uppercase text-[10px]"></span>)</span>
-                            <span class="font-bold text-heading transaction-detail-paid">Rp 0</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold text-gray-400">Kembalian</span>
-                            <span class="font-bold text-heading transaction-detail-changed">Rp 0</span>
+                        <div class="payment-info-block hidden">
+                            <div class="flex justify-between items-center border-t border-dashed border-gray-100 pt-2 text-[11px]">
+                                <span class="font-semibold text-gray-400">Dibayar (<span class="paid_method font-bold text-brand uppercase text-[10px]"></span>)</span>
+                                <span class="font-bold text-heading transaction-detail-paid">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center mt-1.5">
+                                <span class="font-semibold text-gray-400">Kembalian</span>
+                                <span class="font-bold text-heading transaction-detail-changed">Rp 0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -558,6 +560,9 @@
                             $('.transaction-detail-paid').html('Rp ' + addCommas(paid));
                             $('.transaction-detail-changed').html('Rp ' + addCommas(changed));
                             $('.paid_method').text(transaction.paid_method || 'CASH');
+
+                            // Metode pembayaran & kembalian cuma relevan kalau sudah lunas.
+                            $('.payment-info-block').toggleClass('hidden', transaction.status !== 'paid');
                         }
                         
                         modal.toggle();
@@ -954,5 +959,35 @@
                 iframe.contentWindow.print();
             }, 250);
         }
+    </script>
+
+    {{-- Auto-open the transaction detail modal when arriving from a push notification
+         (e.g. "?transaction=<uuid>" from the payment-success FCM notification). --}}
+    <script>
+        $(function() {
+            var params = new URLSearchParams(window.location.search);
+            var targetUuid = params.get('transaction');
+            if (!targetUuid) return;
+
+            // The transaction is paid by the time this notification fires, so it belongs
+            // on the "Lunas (Paid)" tab; fall back to "Semua Antrean" just in case.
+            document.getElementById('paid-tab')?.click();
+
+            setTimeout(function() {
+                var target = $('li[data-uuid="' + targetUuid + '"] .see-transaction').first();
+                if (target.length === 0) {
+                    document.getElementById('all-tab')?.click();
+                    target = $('li[data-uuid="' + targetUuid + '"] .see-transaction').first();
+                }
+                if (target.length > 0) {
+                    target.trigger('click');
+                }
+
+                // Don't reopen the modal if the page is refreshed afterwards.
+                var url = new URL(window.location.href);
+                url.searchParams.delete('transaction');
+                window.history.replaceState({}, '', url);
+            }, 300);
+        });
     </script>
 @endsection

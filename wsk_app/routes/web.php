@@ -60,6 +60,7 @@ Route::middleware('permission:manage_settings')->controller(SettingsController::
     Route::post('/settings/payment/tax/update','paymentTaxUpdate')->name('settings.payment.tax.update');
     Route::post('/settings/restaurant/update','restaurantUpdate')->name('settings.restaurant.update');
     Route::post('/settings/attendance/late','attendanceLateUpdate')->name('settings.attendance.late.update');
+    Route::post('/settings/notification/daily-revenue','dailyRevenueNotificationUpdate')->name('settings.notification.daily-revenue.update');
     Route::post('/settings/apk/upload','apkUpload')->name('settings.apk.upload');
     Route::delete('/settings/apk/delete','apkDelete')->name('settings.apk.delete');
 });

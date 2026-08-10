@@ -52,7 +52,7 @@
 
         {{-- Modal Absensi Staf Premium --}}
         <div id="modal-attendance" tabindex="-1" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-            <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 border border-gray-100 flex flex-col max-h-[90vh]">
+            <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 border border-gray-100 flex flex-col max-h-[96vh] md:max-h-[90vh]">
                 <!-- Modal header -->
                 <div class="flex items-center justify-between p-3 rounded-t shrink-0 border-b border-gray-100 bg-white">
                     <h3 class="text-lg font-bold text-gray-800">
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- Body Modal (Scrollable) -->
-                <div class="p-5 overflow-y-auto flex-grow max-h-[50vh] md:max-h-[55vh]">
+                <div class="p-5 overflow-y-auto flex-grow max-h-[78vh] md:max-h-[55vh]">
                     <!-- Real-time Clock and Date Card -->
                     <div class="bg-gradient-to-r from-brand to-indigo-600 p-4 rounded-2xl text-white text-center shadow-md mb-4 flex-shrink-0">
                         <p class="text-[10px] uppercase tracking-widest text-blue-100 font-semibold opacity-90 mb-0.5">Waktu Sekarang</p>
@@ -90,7 +90,7 @@
                     <div id="attendance-photo-panel" class="mb-4 hidden transition-all duration-300">
                         <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2" id="attendance-photo-title">Ambil Foto Bukti Kehadiran</h4>
                         
-                        <div class="relative w-full h-72 md:h-60 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-inner group">
+                        <div class="relative w-full h-[45vh] md:h-60 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center shadow-inner group">
                             <!-- Live Video Feed -->
                             <video id="attendance-video" class="w-full h-full object-cover block hidden" autoplay playsinline></video>
                             
