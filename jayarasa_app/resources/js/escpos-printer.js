@@ -127,16 +127,25 @@ export class BluetoothPrinter {
     }
 
     /**
-     * Auto-reconnect ke device yang pernah di-pair, tanpa user gesture.
-     * Urutan: direct connect → watchAdvertisements → retry dengan delay
+     * Auto-reconnect ke device yang pernah di-pair.
+     *
+     * @param {boolean} fast - true jika dipanggil LANGSUNG dari dalam event handler tap/click
+     *   user (fallback setelah SecurityError). Browser hanya memberi "user activation" yang
+     *   sangat singkat (hitungan detik) setelah gesture asli — kalau kita menunggu (delay/retry)
+     *   dulu sebelum gatt.connect(), activation itu keburu kadaluarsa dan gesture jadi sia-sia.
+     *   Jadi mode fast langsung connect tanpa delay sama sekali, satu percobaan saja.
+     *   Mode normal (auto saat page load, tanpa gesture) tetap pakai delay+retry karena toh
+     *   tidak ada activation yang perlu "dijaga tetap segar".
      */
-    async reconnectToSavedDevice() {
+    async reconnectToSavedDevice(fast = false) {
         const savedName = localStorage.getItem(BluetoothPrinter.STORAGE_KEY);
         if (!savedName) return false;
 
-        // Tambahkan delay awal agar sub-sistem Bluetooth OS dan printer selesai memproses pemutusan koneksi sebelumnya
-        console.log('[BT] Memulai auto-reconnect dalam 1.2 detik...');
-        await new Promise(r => setTimeout(r, 1200));
+        if (!fast) {
+            // Tambahkan delay awal agar sub-sistem Bluetooth OS dan printer selesai memproses pemutusan koneksi sebelumnya
+            console.log('[BT] Memulai auto-reconnect dalam 1.2 detik...');
+            await new Promise(r => setTimeout(r, 1200));
+        }
 
         if (!navigator.bluetooth || typeof navigator.bluetooth.getDevices !== 'function') {
             console.warn('[BT] getDevices() tidak tersedia pada browser ini.');
@@ -164,6 +173,15 @@ export class BluetoothPrinter {
         if (!target) return false;
 
         console.log('[BT] Menghubungkan ke perangkat:', target.name || savedName);
+
+        if (fast) {
+            // Gesture masih segar — langsung connect, jangan buang waktu dengan delay/retry.
+            console.log('[BT] Upaya koneksi GATT (fast path, memanfaatkan user gesture)...');
+            await this._connectToDevice(target);
+            this._saveDeviceInfo();
+            console.log('[BT] Reconnect (fast path) berhasil!');
+            return true;
+        }
 
         // Coba koneksi langsung hingga 3 kali dengan progresif delay
         const maxAttempts = 3;

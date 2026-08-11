@@ -147,6 +147,29 @@
         @endif
     </div>
 
+    {{-- Landing here always means this device is logged out — whether via the logout button
+         (already cleaned up separately), a session that expired naturally, or a forced logout.
+         Clean up any leftover FCM token so this device stops receiving push notifications for
+         whoever used it last. --}}
+    <script>
+        (function() {
+            var token = localStorage.getItem('jayarasa_fcm_token');
+            if (!token) return;
+            fetch("{{ route('fcm.token.destroy') }}", {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ fcm_token: token })
+            }).catch(function(err) {
+                console.error('FCM token cleanup failed', err);
+            });
+            localStorage.removeItem('jayarasa_fcm_token');
+        })();
+    </script>
+
     <!-- Password visibility toggle script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {

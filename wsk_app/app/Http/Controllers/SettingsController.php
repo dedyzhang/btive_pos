@@ -159,6 +159,7 @@ class SettingsController extends Controller
         $request->validate([
             'apk_file' => 'required|file|max:153600', // 150MB
             'version' => 'nullable|string|max:50',
+            'version_code' => 'nullable|integer|min:1',
         ]);
 
         $file = $request->file('apk_file');
@@ -186,6 +187,7 @@ class SettingsController extends Controller
                 'filename' => 'apk/' . $filename,
                 'original_name' => $file->getClientOriginalName(),
                 'version' => $request->version,
+                'version_code' => $request->version_code ? (int) $request->version_code : null,
                 'size' => $file->getSize(),
                 'uploaded_at' => now()->toDateTimeString(),
             ])]

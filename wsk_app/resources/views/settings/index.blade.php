@@ -574,10 +574,14 @@
                             <div class="min-w-0">
                                 <p class="font-semibold text-sm truncate">{{ $apkData['original_name'] ?? 'app.apk' }}</p>
                                 <p class="text-xs text-gray-500">
-                                    @if(!empty($apkData['version'])) Versi {{ $apkData['version'] }} &middot; @endif
-                                    {{ isset($apkData['size']) ? number_format($apkData['size'] / 1048576, 1) . ' MB' : '' }}
+                                    @if(!empty($apkData['version'])) Versi {{ $apkData['version'] }} @endif
+                                    @if(!empty($apkData['version_code'])) (code {{ $apkData['version_code'] }}) @endif
+                                    &middot; {{ isset($apkData['size']) ? number_format($apkData['size'] / 1048576, 1) . ' MB' : '' }}
                                     @if(!empty($apkData['uploaded_at'])) &middot; Diunggah {{ \Carbon\Carbon::parse($apkData['uploaded_at'])->format('d M Y H:i') }} @endif
                                 </p>
+                                @if(empty($apkData['version_code']))
+                                    <p class="text-[11px] text-amber-600 mt-0.5"><i class="fas fa-triangle-exclamation"></i> Version Code belum diisi — fitur cek update otomatis di app tidak akan mendeteksi APK ini.</p>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
@@ -603,6 +607,13 @@
                     <div class="form-group flex-col w-full">
                         <label for="version" class="text-sm font-medium text-gray-700 mb-1 block">Versi (opsional, contoh: 1.0.0)</label>
                         <input type="text" name="version" id="version" placeholder="1.0.0" class="w-full px-5 py-3 rounded focus:outline-none focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default" value="{{ old('version') }}" />
+                    </div>
+                    <div class="form-group flex-col w-full">
+                        <label for="version_code" class="text-sm font-medium text-gray-700 mb-1 block">Version Code (wajib untuk cek update otomatis)</label>
+                        <input type="number" name="version_code" id="version_code" min="1" placeholder="Samakan dengan versionCode di build.gradle.kts" class="w-full px-5 py-3 rounded focus:outline-none @error('version_code') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('version_code') }}" />
+                        @error('version_code')
+                            <p class="text-sm text-red-500">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="col-span-1 md:col-span-2">
                         <button type="submit" class="w-full sm:w-auto bg-brand text-white py-2 px-4 rounded hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand focus:ring-opacity-50"><i class="fas fa-upload"></i> Unggah Aplikasi</button>

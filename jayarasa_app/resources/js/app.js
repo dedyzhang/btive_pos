@@ -127,7 +127,7 @@ window.initBluetoothUI = async function() {
         async function attemptReconnect(isUserGesture = false) {
             try {
                 console.log(`[BT] Memulai upaya reconnect (UserGesture: ${isUserGesture})...`);
-                const ok = await window.bluetoothPrinterInstance.reconnectToSavedDevice();
+                const ok = await window.bluetoothPrinterInstance.reconnectToSavedDevice(isUserGesture);
                 if (ok) {
                     const name = window.bluetoothPrinterInstance.device
                         ? (window.bluetoothPrinterInstance.device.name || savedName)

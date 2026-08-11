@@ -24,6 +24,7 @@ Route::get('/', function () {
 
 // Public APK download so a user can install the app before ever logging in.
 Route::get('/download/app', [AppDownloadController::class, 'download'])->name('app.download');
+Route::get('/api/app/version', [AppDownloadController::class, 'version'])->name('app.version');
 
 Route::post('/login', [LoginController::class, 'login'])->name('auth.login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('auth.logout')->middleware('auth');
@@ -41,8 +42,13 @@ Route::middleware('permission:access_admin_dashboard')->controller(DashboardCont
 // Which of these tokens actually receive pushes is decided in FcmService, not here.
 Route::middleware('auth')->controller(FcmTokenController::class)->group(function() {
     Route::post('/fcm/token', 'store')->name('fcm.token.store');
-    Route::delete('/fcm/token', 'destroy')->name('fcm.token.destroy');
 });
+
+// Unregistering a token intentionally does NOT require auth: a device must be able to stop
+// receiving pushes even when its session has already expired or been force-logged-out (it
+// can no longer hit an `auth`-gated endpoint at that point). Deleting by exact token value
+// is low-risk — it only removes a registration, never reveals or reads anything.
+Route::delete('/fcm/token', [FcmTokenController::class, 'destroy'])->name('fcm.token.destroy');
 
 Route::resource('products',ProductsController::class)->middleware('permission:manage_products')->except('show');
 Route::resource('products',ProductsController::class)->middleware('auth')->only('show'); 
