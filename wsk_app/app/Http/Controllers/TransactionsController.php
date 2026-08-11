@@ -367,10 +367,11 @@ class TransactionsController extends Controller
      */
     public function printCheckReceipt(String $uuid) {
         $transaction = Transactions::with(['orderItem.product.category', 'table'])->findOrFail($uuid);
-        $transaction->setRelation('orderItem', $transaction->orderItem->sortBy(function ($item) {
-            return $item->product && $item->product->category 
-                ? $item->product->category->sort 
-                : 999999;
+        $uncategorizedSort = Settings::uncategorizedSort();
+        $transaction->setRelation('orderItem', $transaction->orderItem->sortBy(function ($item) use ($uncategorizedSort) {
+            return $item->product && $item->product->category
+                ? $item->product->category->sort
+                : $uncategorizedSort;
         })->values());
         $setting = Settings::whereIn('jenis',['restaurant_settings','restaurant_logo'])->get();
         $user_login = User::findOrFail($transaction->user_id);
@@ -459,10 +460,11 @@ class TransactionsController extends Controller
      */
     public function printCheckReceiptNoPrice(String $uuid) {
         $transaction = Transactions::with(['orderItem.product.category', 'table'])->findOrFail($uuid);
-        $transaction->setRelation('orderItem', $transaction->orderItem->sortBy(function ($item) {
-            return $item->product && $item->product->category 
-                ? $item->product->category->sort 
-                : 999999;
+        $uncategorizedSort = Settings::uncategorizedSort();
+        $transaction->setRelation('orderItem', $transaction->orderItem->sortBy(function ($item) use ($uncategorizedSort) {
+            return $item->product && $item->product->category
+                ? $item->product->category->sort
+                : $uncategorizedSort;
         })->values());
         $setting = Settings::whereIn('jenis',['restaurant_settings','restaurant_logo'])->get();
         $user_login = User::findOrFail($transaction->user_id);
@@ -556,10 +558,11 @@ class TransactionsController extends Controller
 
     public function printReceipt(String $uuid) {
         $transaction = Transactions::with(['orderItem.product.category', 'table'])->findOrFail($uuid);
-        $transaction->setRelation('orderItem', $transaction->orderItem->sortBy(function ($item) {
-            return $item->product && $item->product->category 
-                ? $item->product->category->sort 
-                : 999999;
+        $uncategorizedSort = Settings::uncategorizedSort();
+        $transaction->setRelation('orderItem', $transaction->orderItem->sortBy(function ($item) use ($uncategorizedSort) {
+            return $item->product && $item->product->category
+                ? $item->product->category->sort
+                : $uncategorizedSort;
         })->values());
         $setting = Settings::whereIn('jenis',['restaurant_settings','restaurant_logo'])->get();
         $user_login = User::findOrFail($transaction->user_id);

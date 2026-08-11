@@ -221,7 +221,18 @@ class SettingsController extends Controller
     public function categorySort(Request $request) {
         $categories = $request->urutan;
 
-        \App\Models\Categories::upsert($categories, 'uuid', ['sort','nama','icon','color']);
+        if (!empty($categories)) {
+            \App\Models\Categories::upsert($categories, 'uuid', ['sort','nama','icon','color']);
+        }
+
+        // The "Tanpa Kategori" card is a virtual entry in the same drag list — it has no
+        // categories row, so its position lives in settings instead.
+        if ($request->filled('uncategorized_sort')) {
+            Settings::updateOrCreate(
+                ['jenis' => 'uncategorized_sort'],
+                ['nilai' => (int) $request->uncategorized_sort]
+            );
+        }
 
         return response()->json(['success' => true,'message' => 'Successfully Sorted the categories']);
     }

@@ -447,17 +447,40 @@
             
             <div class="col-span-1 md:col-span-2">
                 <p class="categories-list-title text-base font-medium text-gray-700">Categories List</p>
-                <p class="category-description text-sm font-medium text-gray-500 mb-4">Drag to rearrange the categories</p>
+                <p class="category-description text-sm font-medium text-gray-500 mb-4">Drag to rearrange the categories. Urutan ini dipakai untuk urutan item di struk.</p>
+                @php
+                    // "Tanpa Kategori" isn't a real category row — merge it into the list at its
+                    // saved position so admins can drag it anywhere among the real categories.
+                    $uncategorizedSortValue = \App\Models\Settings::uncategorizedSort();
+                    $sortableEntries = $categories
+                        ->map(fn ($category) => ['is_uncategorized' => false, 'sort' => (int) $category->sort, 'category' => $category])
+                        ->push(['is_uncategorized' => true, 'sort' => $uncategorizedSortValue, 'category' => null])
+                        ->sortBy('sort')
+                        ->values();
+                @endphp
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 auto-rows-min" id="sortable-category">
-                    @foreach ($categories as $category)
-                        <div class="category-list col-span-1 border border-gray-200 rounded-lg p-4 flex flex-col items-center justify-center relative cursor-move hover:shadow-md transition-shadow" data-uuid="{{ $category->uuid }}" data-name="{{ $category->nama }}" data-color="{{ $category->color }}" data-icon="{{ $category->icon }}">
-                            <div class="icon-place flex items-center justify-center mb-3 w-12 h-12 rounded-2xl text-white {{ $category->color }}">
-                                <i class="fas {{ $category->icon }} text-lg"></i>
+                    @foreach ($sortableEntries as $entry)
+                        @if ($entry['is_uncategorized'])
+                            <div class="category-list col-span-1 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg p-4 flex flex-col items-center justify-center relative cursor-move hover:shadow-md transition-shadow" data-uuid="__uncategorized__">
+                                <div class="icon-place flex items-center justify-center mb-3 w-12 h-12 rounded-2xl text-white bg-gray-400">
+                                    <i class="fas fa-tag text-lg"></i>
+                                </div>
+                                <div class="category-detail-place w-full text-center">
+                                    <p class="category-name text-sm font-bold text-gray-700">Tanpa Kategori</p>
+                                    <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Item manual &amp; produk tanpa kategori</p>
+                                </div>
                             </div>
-                            <div class="category-detail-place w-full text-center">
-                                <p class="category-name text-sm font-bold text-gray-700">{{ $category->nama }}</p>
+                        @else
+                            @php $category = $entry['category']; @endphp
+                            <div class="category-list col-span-1 border border-gray-200 rounded-lg p-4 flex flex-col items-center justify-center relative cursor-move hover:shadow-md transition-shadow" data-uuid="{{ $category->uuid }}" data-name="{{ $category->nama }}" data-color="{{ $category->color }}" data-icon="{{ $category->icon }}">
+                                <div class="icon-place flex items-center justify-center mb-3 w-12 h-12 rounded-2xl text-white {{ $category->color }}">
+                                    <i class="fas {{ $category->icon }} text-lg"></i>
+                                </div>
+                                <div class="category-detail-place w-full text-center">
+                                    <p class="category-name text-sm font-bold text-gray-700">{{ $category->nama }}</p>
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     @endforeach
                 </div>
                 <button type="button" class="w-full bg-brand hover:bg-brand-strong text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98] w-full sm:w-auto mt-4 sort-category"><i class="fas fa-sort"></i> Urutkan Kategori</button>
@@ -908,18 +931,26 @@
             loading();
             var url = "{{route('settings.category.sort')}}";
             var urutan_array = [];
+            var uncategorized_sort = null;
             var i = 1;
             $('.category-list').each(function() {
-                urutan_array.push({
-                    "sort": i,
-                    "uuid" : $(this).data('uuid'),
-                    "color" : $(this).data('color'),
-                    "nama" : $(this).data('name'),
-                    "icon" : $(this).data('icon'),
-                });
+                var uuid = $(this).data('uuid');
+                // The "Tanpa Kategori" card shares the same numbering but has no categories
+                // row — it's saved separately as a setting.
+                if (uuid === '__uncategorized__') {
+                    uncategorized_sort = i;
+                } else {
+                    urutan_array.push({
+                        "sort": i,
+                        "uuid" : uuid,
+                        "color" : $(this).data('color'),
+                        "nama" : $(this).data('name'),
+                        "icon" : $(this).data('icon'),
+                    });
+                }
                 i++;
             });
-            
+
             $.ajax({
                 type: "post",
                 url: url,
@@ -927,7 +958,8 @@
                     "X-CSRF-TOKEN": "{{csrf_token()}}"
                 },
                 data: {
-                    "urutan" : urutan_array
+                    "urutan" : urutan_array,
+                    "uncategorized_sort" : uncategorized_sort
                 },
                 success: function(data) {
                     if(data.success === true) {

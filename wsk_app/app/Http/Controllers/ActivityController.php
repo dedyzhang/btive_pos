@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Settings;
 use App\Models\Transactions;
 use Illuminate\Http\Request;
 
@@ -58,6 +59,7 @@ class ActivityController extends Controller
     }
 
     private function getReportSummaryData($transactions, $startDate, $endDate) {
+        $uncategorizedSort = Settings::uncategorizedSort();
         $reportSummary = array();
         $reportSummary['date'] = $startDate === $endDate ? $startDate : $startDate . ' s/d ' . $endDate;
         $reportSummary['start_date'] = $startDate;
@@ -101,10 +103,10 @@ class ActivityController extends Controller
                     $cost_price = $orderItem->product->cost_price ?? 0;
                 }
 
-                $categorySort = 999999;
+                $categorySort = $uncategorizedSort;
                 $categoryName = 'Uncategorized';
                 if ($orderItem->product && $orderItem->product->category) {
-                    $categorySort = $orderItem->product->category->sort ?? 999999;
+                    $categorySort = $orderItem->product->category->sort ?? $uncategorizedSort;
                     $categoryName = $orderItem->product->category->nama ?? 'Uncategorized';
                 }
 

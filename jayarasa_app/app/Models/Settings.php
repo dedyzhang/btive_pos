@@ -14,4 +14,22 @@ class Settings extends Model
         'jenis',
         'nilai'
     ];
+
+    /**
+     * Where items without a category (manual items, or products whose category was deleted)
+     * belong in the receipt's category ordering. Admin sets this by dragging the
+     * "Tanpa Kategori" card in Settings > Setting Urutan Kategori.
+     *
+     * Defaults to last so behaviour is unchanged until an admin positions it explicitly.
+     */
+    public static function uncategorizedSort(): int
+    {
+        $setting = static::where('jenis', 'uncategorized_sort')->first();
+
+        return $setting && $setting->nilai !== null && $setting->nilai !== ''
+            ? (int) $setting->nilai
+            : self::UNCATEGORIZED_SORT_LAST;
+    }
+
+    public const UNCATEGORIZED_SORT_LAST = 999999;
 }
