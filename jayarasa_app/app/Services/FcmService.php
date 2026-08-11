@@ -25,6 +25,7 @@ class FcmService
             $tokens = DeviceToken::whereIn('user_id', $this->adminUserIds())->pluck('fcm_token', 'id');
 
             if ($tokens->isEmpty()) {
+                Log::info('FCM notifyPaymentSuccess: no admin device_tokens registered, skipping.');
                 return;
             }
 
@@ -61,6 +62,7 @@ class FcmService
             $tokens = DeviceToken::whereIn('user_id', $this->adminUserIds())->pluck('fcm_token', 'id');
 
             if ($tokens->isEmpty()) {
+                Log::info('FCM notifyDailyRevenue: no admin device_tokens registered, skipping.');
                 return;
             }
 
@@ -96,6 +98,7 @@ class FcmService
             $tokens = DeviceToken::whereIn('user_id', $this->cashierAndKitchenUserIds())->pluck('fcm_token', 'id');
 
             if ($tokens->isEmpty()) {
+                Log::info('FCM notifyNewOrder: no cashier/kitchen device_tokens registered, skipping.');
                 return;
             }
 
@@ -166,6 +169,8 @@ class FcmService
             Log::error('FCM sendMulticast failed: ' . $e->getMessage());
             return;
         }
+
+        Log::info("FCM sendMulticast: {$report->successes()->count()} succeeded, {$report->failures()->count()} failed, out of {$tokens->count()} token(s).");
 
         // Drop tokens that are no longer valid (app uninstalled, token rotated, etc.)
         foreach ($report->invalidTokens() as $invalidToken) {

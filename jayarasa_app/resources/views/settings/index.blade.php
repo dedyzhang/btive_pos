@@ -12,14 +12,19 @@
 @endsection
 
 @section('container')
-    <div class="container-place w-full p-6 flex gap-2 flex-wrap flex-col">
-        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
-                <p class="text-lg font-bold">Setting Restaurant</p>
-                <p class="text-sm">Restaurant Configuration</p>
+    <div class="container-place w-full p-4 sm:p-6 flex gap-5 flex-wrap flex-col bg-gray-50/50">
+        <div class="p-5 sm:p-7 bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="col-span-1 md:col-span-2 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div class="w-11 h-11 rounded-xl bg-brand-soft text-brand flex items-center justify-center shrink-0 text-lg">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold text-gray-800">Setting Restaurant</p>
+                    <p class="text-xs text-gray-400">Restaurant Configuration</p>
+                </div>
             </div>
             @if(session('success_restaurant'))
-            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-4 text-sm text-fg-success-strong rounded-base bg-success-soft" role="alert">
+            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-2 text-sm text-emerald-700 rounded-2xl bg-emerald-50 border border-emerald-100" role="alert">
                 <i class="me-2 mt-0.5 sm:mt-0 fas fa-check"></i>
                 <p><span class="font-medium me-1">Sukses!</span> {{session('success_restaurant')}}</p>
             </div>
@@ -46,14 +51,14 @@
                     @csrf
                     <div class="form-group flex-col w-full">
                         <label for="restaurant_name">Restaurant Name</label>
-                        <input type="text" name="restaurant_name" id="restaurant_name" placeholder="Input Restaurant Name" class="w-full px-5 py-3 rounded focus:outline-none  @error('restaurant_name') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('restaurant_name',$settingResArray && $settingResArray['name'] ? $settingResArray['name'] : '') }}" />
+                        <input type="text" name="restaurant_name" id="restaurant_name" placeholder="Input Restaurant Name" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft  @error('restaurant_name') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all @enderror" value="{{ old('restaurant_name',$settingResArray && $settingResArray['name'] ? $settingResArray['name'] : '') }}" />
                         @error('restaurant_name')
                             <p class="text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="form-group flex-col w-full">
                         <label for="restaurant_location">Restaurant Location</label>
-                        <input type="text" name="restaurant_location" id="restaurant_location" placeholder="Input Restaurant Location" class="w-full px-5 py-3 rounded focus:outline-none  @error('restaurant_location') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('restaurant_location',$settingResArray && $settingResArray['location'] ? $settingResArray['location'] : '') }}" />
+                        <input type="text" name="restaurant_location" id="restaurant_location" placeholder="Input Restaurant Location" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft  @error('restaurant_location') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all @enderror" value="{{ old('restaurant_location',$settingResArray && $settingResArray['location'] ? $settingResArray['location'] : '') }}" />
                         @error('restaurant_location')
                             <p class="text-sm text-red-500">{{ $message }}</p>
                         @enderror
@@ -89,7 +94,7 @@
                         <input type="hidden" value="0" name="is_changed" id="is_changed" />
                         <label for="picture" class="text-sm font-medium text-gray-700 mb-1 block">Restaurant Logo</label>
                         <div class="flex items-center justify-center w-full uploaded-place {{$settingrestaurantlogo && $settingrestaurantlogo->nilai ? 'hidden' : ''}}">
-                            <label for="picture" class="flex flex-col items-center justify-center w-full h-64 bg-neutral-secondary-medium border border-dashed border-default-strong rounded-base cursor-pointer hover:bg-neutral-tertiary-medium">
+                            <label for="picture" class="flex flex-col items-center justify-center w-full h-64 bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:bg-brand-soft hover:border-brand/40 transition-all">
                                 <div class="flex flex-col items-center justify-center text-body pt-5 pb-6">
                                     <svg class="w-8 h-8 mb-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h3a3 3 0 0 0 0-6h-.025a5.56 5.56 0 0 0 .025-.5A5.5 5.5 0 0 0 7.207 9.021C7.137 9.017 7.071 9 7 9a4 4 0 1 0 0 8h2.167M12 19v-9m0 0-2 2m2-2 2 2"/></svg>
                                     <p class="mb-2 text-sm"><span class="font-semibold">Click to upload</span> or drag and drop</p>
@@ -98,7 +103,7 @@
                                 <input id="picture" name="picture" type="file" class="hidden" />
                             </label>
                         </div> 
-                        <div class="preview-place flex border border-gray-200 rounded-lg w-full sm:w-100 relative {{$settingrestaurantlogo && $settingrestaurantlogo->nilai ? '' : 'hidden'}} ">
+                        <div class="preview-place flex border border-gray-200 rounded-2xl overflow-hidden w-full sm:w-100 relative {{$settingrestaurantlogo && $settingrestaurantlogo->nilai ? '' : 'hidden'}} ">
                             <button type="button" class="absolute flex justify-center top-1 right-2 text-3xl delete-image cursor-pointer w-10 h-10 bg-neutral-primary hover:bg-brand-light hover:text-neutral-primary shadow-lg rounded-full">
                                 &times;
                             </button>
@@ -116,13 +121,18 @@
                 </form>
             </div>
         </div>
-        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-1 md:col-span-2">
-                <p class="text-lg font-bold">Setting Table</p>
-                <p class="text-sm">Add, Edit and Delete Table that is available in the store</p>
+        <div class="p-5 sm:p-7 bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="col-span-1 md:col-span-2 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 text-lg">
+                    <i class="fas fa-chair"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold text-gray-800">Setting Table</p>
+                    <p class="text-xs text-gray-400">Add, Edit and Delete Table that is available in the store</p>
+                </div>
             </div>
             @if(session('success_table'))
-                <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-4 text-sm text-fg-success-strong rounded-base bg-success-soft" role="alert">
+                <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-2 text-sm text-emerald-700 rounded-2xl bg-emerald-50 border border-emerald-100" role="alert">
                     <i class="me-2 mt-0.5 sm:mt-0 fas fa-check"></i>
                     <p><span class="font-medium me-1">Sukses!</span> {{session('success_table')}}</p>
                 </div>
@@ -133,7 +143,7 @@
                     @csrf
                     <div class="form-group relative w-full">
                         <label for="table_name" class="text-sm font-medium text-gray-700 mb-1 block">Table Name</label>
-                        <input type="text" name="table_name" id="table_name" placeholder="Masukkan Nama Produk" class="w-full px-5 py-3 rounded focus:outline-none  @error('table_name') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('table_name') }}">
+                        <input type="text" name="table_name" id="table_name" placeholder="Masukkan Nama Produk" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft  @error('table_name') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all @enderror" value="{{ old('table_name') }}">
                         @error('table_name')
                             <p class="text-sm text-red-500">{{ $message }}</p>
                         @enderror
@@ -145,7 +155,7 @@
                         {{-- Color list --}}
                         <div class="col-span-1">
                             <input type="radio" id="table_color_red_500" name="table_color" value="bg-red-500" class="hidden peer" @if(old('table_color') == 'bg-red-500') checked @endif>
-                            <label for="table_color_red_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_red_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-red-500"></div>
                                 </div>
@@ -153,7 +163,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_red_300" name="table_color" value="bg-red-300" class="hidden peer" @if(old('table_color') == 'bg-red-300') checked @endif>
-                            <label for="table_color_red_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_red_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-red-300"></div>
                                 </div>
@@ -161,7 +171,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_red_100" name="table_color" value="bg-red-100" class="hidden peer" @if(old('table_color') == 'bg-red-100') checked @endif>
-                            <label for="table_color_red_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_red_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-red-100"></div>
                                 </div>
@@ -169,7 +179,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_blue_500" name="table_color" value="bg-blue-500" class="hidden peer" @if(old('table_color') == 'bg-blue-500') checked @endif>
-                            <label for="table_color_blue_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_blue_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-blue-500"></div>
                                 </div>
@@ -177,7 +187,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_blue_300" name="table_color" value="bg-blue-300" class="hidden peer" @if(old('table_color') == 'bg-blue-300') checked @endif>
-                            <label for="table_color_blue_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_blue_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-blue-300"></div>
                                 </div>
@@ -185,7 +195,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_blue_100" name="table_color" value="bg-blue-100" class="hidden peer" @if(old('table_color') == 'bg-blue-100') checked @endif>
-                            <label for="table_color_blue_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_blue_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-blue-100"></div>
                                 </div>
@@ -193,7 +203,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_green_500" name="table_color" value="bg-green-500" class="hidden peer" @if(old('table_color') == 'bg-green-500') checked @endif>
-                            <label for="table_color_green_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_green_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-green-500"></div>
                                 </div>
@@ -201,7 +211,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_green_300" name="table_color" value="bg-green-300" class="hidden peer" @if(old('table_color') == 'bg-green-300') checked @endif>
-                            <label for="table_color_green_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_green_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-green-300"></div>
                                 </div>
@@ -209,7 +219,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_green_100" name="table_color" value="bg-green-100" class="hidden peer" @if(old('table_color') == 'bg-green-100') checked @endif>
-                            <label for="table_color_green_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_green_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-green-100"></div>
                                 </div>
@@ -217,7 +227,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_yellow_500" name="table_color" value="bg-yellow-500" class="hidden peer" @if(old('table_color') == 'bg-yellow-500') checked @endif>
-                            <label for="table_color_yellow_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_yellow_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-yellow-500"></div>
                                 </div>
@@ -225,7 +235,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_yellow_300" name="table_color" value="bg-yellow-300" class="hidden peer" @if(old('table_color') == 'bg-yellow-300') checked @endif>
-                            <label for="table_color_yellow_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_yellow_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-yellow-300"></div>
                                 </div>
@@ -233,7 +243,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_yellow_100" name="table_color" value="bg-yellow-100" class="hidden peer" @if(old('table_color') == 'bg-yellow-100') checked @endif>
-                            <label for="table_color_yellow_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_yellow_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-yellow-100"></div>
                                 </div>
@@ -241,7 +251,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_lime_500" name="table_color" value="bg-lime-500" class="hidden peer" @if(old('table_color') == 'bg-lime-500') checked @endif>
-                            <label for="table_color_lime_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_lime_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-lime-500"></div>
                                 </div>
@@ -249,7 +259,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_lime_300" name="table_color" value="bg-lime-300" class="hidden peer" @if(old('table_color') == 'bg-lime-300') checked @endif>
-                            <label for="table_color_lime_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_lime_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-lime-300"></div>
                                 </div>
@@ -257,7 +267,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_lime_100" name="table_color" value="bg-lime-100" class="hidden peer" @if(old('table_color') == 'bg-lime-100') checked @endif>
-                            <label for="table_color_lime_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_lime_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-lime-100"></div>
                                 </div>
@@ -265,7 +275,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_indigo_500" name="table_color" value="bg-indigo-500" class="hidden peer" @if(old('table_color') == 'bg-indigo-500') checked @endif>
-                            <label for="table_color_indigo_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_indigo_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-indigo-500"></div>
                                 </div>
@@ -273,7 +283,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_indigo_300" name="table_color" value="bg-indigo-300" class="hidden peer" @if(old('table_color') == 'bg-indigo-300') checked @endif>
-                            <label for="table_color_indigo_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_indigo_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-indigo-300"></div>
                                 </div>
@@ -281,7 +291,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_indigo_100" name="table_color" value="bg-indigo-100" class="hidden peer" @if(old('table_color') == 'bg-indigo-100') checked @endif>
-                            <label for="table_color_indigo_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_indigo_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-indigo-100"></div>
                                 </div>
@@ -289,7 +299,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_violet_500" name="table_color" value="bg-violet-500" class="hidden peer" @if(old('table_color') == 'bg-violet-500') checked @endif>
-                            <label for="table_color_violet_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_violet_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-violet-500"></div>
                                 </div>
@@ -297,7 +307,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_violet_300" name="table_color" value="bg-violet-300" class="hidden peer" @if(old('table_color') == 'bg-violet-300') checked @endif>
-                            <label for="table_color_violet_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_violet_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-violet-300"></div>
                                 </div>
@@ -305,7 +315,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_violet_100" name="table_color" value="bg-violet-100" class="hidden peer" @if(old('table_color') == 'bg-violet-100') checked @endif>
-                            <label for="table_color_violet_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_violet_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-violet-100"></div>
                                 </div>
@@ -313,7 +323,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_sky_500" name="table_color" value="bg-sky-500" class="hidden peer" @if(old('table_color') == 'bg-sky-500') checked @endif>
-                            <label for="table_color_sky_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_sky_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-sky-500"></div>
                                 </div>
@@ -321,7 +331,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_sky_300" name="table_color" value="bg-sky-300" class="hidden peer" @if(old('table_color') == 'bg-sky-300') checked @endif>
-                            <label for="table_color_sky_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_sky_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-sky-300"></div>
                                 </div>
@@ -329,7 +339,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_sky_100" name="table_color" value="bg-sky-100" class="hidden peer" @if(old('table_color') == 'bg-sky-100') checked @endif>
-                            <label for="table_color_sky_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_sky_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-sky-100"></div>
                                 </div>
@@ -337,7 +347,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_pink_500" name="table_color" value="bg-pink-500" class="hidden peer" @if(old('table_color') == 'bg-pink-500') checked @endif>
-                            <label for="table_color_pink_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_pink_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-pink-500"></div>
                                 </div>
@@ -345,7 +355,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_pink_300" name="table_color" value="bg-pink-300" class="hidden peer" @if(old('table_color') == 'bg-pink-300') checked @endif>
-                            <label for="table_color_pink_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_pink_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-pink-300"></div>
                                 </div>
@@ -353,7 +363,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_pink_100" name="table_color" value="bg-pink-100" class="hidden peer" @if(old('table_color') == 'bg-pink-100') checked @endif>
-                            <label for="table_color_pink_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_pink_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-pink-100"></div>
                                 </div>
@@ -361,7 +371,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_amber_500" name="table_color" value="bg-amber-500" class="hidden peer" @if(old('table_color') == 'bg-amber-500') checked @endif>
-                            <label for="table_color_amber_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_amber_500" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-amber-500"></div>
                                 </div>
@@ -369,7 +379,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_amber_300" name="table_color" value="bg-amber-300" class="hidden peer" @if(old('table_color') == 'bg-amber-300') checked @endif>
-                            <label for="table_color_amber_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_amber_300" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-amber-300"></div>
                                 </div>
@@ -377,7 +387,7 @@
                         </div>
                         <div class="col-span-1">
                             <input type="radio" id="table_color_amber_100" name="table_color" value="bg-amber-100" class="hidden peer" @if(old('table_color') == 'bg-amber-100') checked @endif>
-                            <label for="table_color_amber_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-neutral-primary-soft border border-default rounded-base cursor-pointer peer-checked:hover:bg-brand-softer peer-checked:border-brand-subtle peer-checked:bg-brand-softer hover:bg-neutral-secondary-medium peer-checked:text-fg-brand-strong">                           
+                            <label for="table_color_amber_100" class="inline-flex items-center justify-between w-full p-3 text-body bg-gray-50 border-2 border-transparent rounded-2xl cursor-pointer transition-all hover:scale-105 hover:shadow-sm peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:shadow-sm peer-checked:scale-105">                           
                                 <div class="flex justify-center w-full">
                                     <div class="w-5 h-5 rounded-full bg-amber-100"></div>
                                 </div>
@@ -390,7 +400,7 @@
                         @enderror
                     </div>
                     <div class="form-group button-place w-full mt-2">
-                        <button type="submit" class="w-full bg-brand-light hover:bg-brand-strong text-white font-medium py-2 px-4 cursor-pointer rounded-base w-full sm:w-auto"><i class="fas fa-save"></i> Add Tables</button>
+                        <button type="submit" class="w-full bg-brand hover:bg-brand-strong text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98] w-full sm:w-auto"><i class="fas fa-save"></i> Add Tables</button>
                     </div>
                 </form>
             </div>
@@ -399,7 +409,7 @@
                 <p class="table-description text-sm font-medium text-gray-500 mb-4">Drag to rearrange the table</p>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-2 auto-rows-min" id="sortable-table">
                     @foreach ($tables as $table)
-                        <div class="table-list col-span-1 border border-gray-200 rounded-lg p-3 flex flex-wrap relative cursor-move" data-uuid="{{ $table->uuid }}" data-name="{{ $table->name }}" data-color="{{$table->color}}">
+                        <div class="table-list col-span-1 border border-gray-200 rounded-2xl p-3 flex flex-wrap relative cursor-move hover:shadow-sm transition-all bg-white" data-uuid="{{ $table->uuid }}" data-name="{{ $table->name }}" data-color="{{$table->color}}">
                             <div class="icon-place flex items-center justify-center mb-3 w-8 h-8 rounded-full {{ $table->color }}">
                                 <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>table</title> <path d="M18.76,6l2,4H3.24l2-4H18.76M20,4H4L1,10v2H3v7H5V16H19v3h2V12h2V10L20,4ZM5,14V12H19v2Z"></path> <rect width="24" height="24" fill="none"></rect> </g></svg>
                             </div>
@@ -419,15 +429,20 @@
                     
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2 mt-3 w-full">
-                    <button type="button" class="w-full bg-brand-light hover:bg-brand-strong text-white font-medium py-2 px-4 cursor-pointer rounded-base sort-table"><i class="fas fa-sort"></i> Sort Table</button>
-                    <button type="button" id="btn-print-all-qr" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4 cursor-pointer rounded-base"><i class="fas fa-print"></i> Cetak Semua QR Code</button>
+                    <button type="button" class="w-full bg-brand hover:bg-brand-strong text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98] sort-table"><i class="fas fa-sort"></i> Sort Table</button>
+                    <button type="button" id="btn-print-all-qr" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-emerald-500/20 transition-all active:scale-[0.98]"><i class="fas fa-print"></i> Cetak Semua QR Code</button>
                 </div>
         </div>
         
-        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
-                <p class="text-lg font-bold">Setting Urutan Kategori</p>
-                <p class="text-sm">Drag to rearrange category order for display and receipt printing</p>
+        <div class="p-5 sm:p-7 bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="col-span-1 md:col-span-2 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-lg">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold text-gray-800">Setting Urutan Kategori</p>
+                    <p class="text-xs text-gray-400">Drag to rearrange category order for display and receipt printing</p>
+                </div>
             </div>
             
             <div class="col-span-1 md:col-span-2">
@@ -445,17 +460,22 @@
                         </div>
                     @endforeach
                 </div>
-                <button type="button" class="w-full bg-brand-light hover:bg-brand-strong text-white font-medium py-2 px-4 cursor-pointer rounded-base w-full sm:w-auto mt-4 sort-category"><i class="fas fa-sort"></i> Urutkan Kategori</button>
+                <button type="button" class="w-full bg-brand hover:bg-brand-strong text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98] w-full sm:w-auto mt-4 sort-category"><i class="fas fa-sort"></i> Urutkan Kategori</button>
             </div>
         </div>
 
-        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
-                <p class="text-lg font-bold">Setting Payment</p>
-                <p class="text-sm">Payments Configuration on the system</p>
+        <div class="p-5 sm:p-7 bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="col-span-1 md:col-span-2 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 text-lg">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold text-gray-800">Setting Payment</p>
+                    <p class="text-xs text-gray-400">Payments Configuration on the system</p>
+                </div>
             </div>
             @if(session('success_tax'))
-            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-4 text-sm text-fg-success-strong rounded-base bg-success-soft" role="alert">
+            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-2 text-sm text-emerald-700 rounded-2xl bg-emerald-50 border border-emerald-100" role="alert">
                 <i class="me-2 mt-0.5 sm:mt-0 fas fa-check"></i>
                 <p><span class="font-medium me-1">Sukses!</span> {{session('success_tax')}}</p>
             </div>
@@ -469,24 +489,29 @@
                 <form method="POST" action="{{ route('settings.payment.tax.update') }}">
                     @csrf
                     <p class="text-base mb-1">Payment Tax (% Percentage)</p>
-                    <input type="number" name="tax" class="w-full px-5 py-3 rounded focus:outline-none  @error('tax') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('tax',$settingtax ? $settingtax->nilai : "") }}" id="payment_tax" placeholder="Input tax percentage">
+                    <input type="number" name="tax" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft  @error('tax') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all @enderror" value="{{ old('tax',$settingtax ? $settingtax->nilai : "") }}" id="payment_tax" placeholder="Input tax percentage">
                     @error('tax')
                         <p class="text-sm text-red-500">{{ $message }}</p>
                     @enderror
 
-                    <button type="submit" class="w-full bg-brand-light hover:bg-brand-strong text-white font-medium py-2 px-4 cursor-pointer rounded-base w-full sm:w-auto mt-2"><i class="fas fa-save"></i> Update Tax</button>
+                    <button type="submit" class="w-full bg-brand hover:bg-brand-strong text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98] w-full sm:w-auto mt-2"><i class="fas fa-save"></i> Update Tax</button>
                     
                 </form>
             </div>
         </div>
 
-        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
-                <p class="text-lg font-bold">Setting Absensi Karyawan</p>
-                <p class="text-sm">Batas Toleransi Waktu Absen Masuk Staf</p>
+        <div class="p-5 sm:p-7 bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="col-span-1 md:col-span-2 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-lg">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold text-gray-800">Setting Absensi Karyawan</p>
+                    <p class="text-xs text-gray-400">Batas Toleransi Waktu Absen Masuk Staf</p>
+                </div>
             </div>
             @if(session('success_late_time'))
-            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-4 text-sm text-fg-success-strong rounded-base bg-success-soft" role="alert">
+            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-2 text-sm text-emerald-700 rounded-2xl bg-emerald-50 border border-emerald-100" role="alert">
                 <i class="me-2 mt-0.5 sm:mt-0 fas fa-check"></i>
                 <p><span class="font-medium me-1">Sukses!</span> {{session('success_late_time')}}</p>
             </div>
@@ -500,23 +525,28 @@
                 <form method="POST" action="{{ route('settings.attendance.late.update') }}">
                     @csrf
                     <p class="text-base mb-1">Jam Batas Masuk (Format Jam:Menit, e.g. 08:00)</p>
-                    <input type="time" name="late_time" class="w-full px-5 py-3 rounded focus:outline-none focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default" value="{{ old('late_time', $settingLate ? $settingLate->nilai : '08:00') }}" id="attendance_late_time">
+                    <input type="time" name="late_time" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all" value="{{ old('late_time', $settingLate ? $settingLate->nilai : '08:00') }}" id="attendance_late_time">
                     @error('late_time')
                         <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                     @enderror
 
-                    <button type="submit" class="w-full bg-brand-light hover:bg-brand-strong text-white font-medium py-2 px-4 cursor-pointer rounded-base w-full sm:w-auto mt-2"><i class="fas fa-save"></i> Update Jam Batas</button>
+                    <button type="submit" class="w-full bg-brand hover:bg-brand-strong text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98] w-full sm:w-auto mt-2"><i class="fas fa-save"></i> Update Jam Batas</button>
                 </form>
             </div>
         </div>
 
-        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
-                <p class="text-lg font-bold">Notifikasi Laporan Pendapatan Harian</p>
-                <p class="text-sm">Kirim notifikasi total pendapatan hari ini ke HP admin pada jam tertentu</p>
+        <div class="p-5 sm:p-7 bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="col-span-1 md:col-span-2 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 text-lg">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold text-gray-800">Notifikasi Laporan Pendapatan Harian</p>
+                    <p class="text-xs text-gray-400">Kirim notifikasi total pendapatan hari ini ke HP admin pada jam tertentu</p>
+                </div>
             </div>
             @if(session('success_daily_revenue'))
-            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-4 text-sm text-fg-success-strong rounded-base bg-success-soft" role="alert">
+            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-2 text-sm text-emerald-700 rounded-2xl bg-emerald-50 border border-emerald-100" role="alert">
                 <i class="me-2 mt-0.5 sm:mt-0 fas fa-check"></i>
                 <p><span class="font-medium me-1">Sukses!</span> {{session('success_daily_revenue')}}</p>
             </div>
@@ -536,23 +566,28 @@
                     </label>
 
                     <p class="text-base mb-1">Jam Kirim Notifikasi</p>
-                    <input type="time" name="time" class="w-full px-5 py-3 rounded focus:outline-none @error('time') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('time', $dailyRevenueData['time'] ?? '21:00') }}" id="daily_revenue_time">
+                    <input type="time" name="time" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft @error('time') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all @enderror" value="{{ old('time', $dailyRevenueData['time'] ?? '21:00') }}" id="daily_revenue_time">
                     @error('time')
                         <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                     @enderror
 
-                    <button type="submit" class="w-full bg-brand-light hover:bg-brand-strong text-white font-medium py-2 px-4 cursor-pointer rounded-base w-full sm:w-auto mt-3"><i class="fas fa-save"></i> Simpan Pengaturan</button>
+                    <button type="submit" class="w-full bg-brand hover:bg-brand-strong text-white font-semibold py-2.5 px-5 cursor-pointer rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98] w-full sm:w-auto mt-3"><i class="fas fa-save"></i> Simpan Pengaturan</button>
                 </form>
             </div>
         </div>
 
-        <div class="p-4 bg-white rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="col-span-1 md:col-span-2 border-b border-gray-200 pb-3">
-                <p class="text-lg font-bold">Aplikasi Android (APK)</p>
-                <p class="text-sm">Unggah file APK agar bisa diunduh pengguna langsung dari halaman login</p>
+        <div class="p-5 sm:p-7 bg-white rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="col-span-1 md:col-span-2 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <div class="w-11 h-11 rounded-xl bg-brand-soft text-brand flex items-center justify-center shrink-0 text-lg">
+                    <i class="fab fa-android"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold text-gray-800">Aplikasi Android (APK)</p>
+                    <p class="text-xs text-gray-400">Unggah file APK agar bisa diunduh pengguna langsung dari halaman login</p>
+                </div>
             </div>
             @if(session('success_apk'))
-            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-4 text-sm text-fg-success-strong rounded-base bg-success-soft" role="alert">
+            <div class="col-span-1 md:col-span-2 flex items-start sm:items-center p-4 mb-2 text-sm text-emerald-700 rounded-2xl bg-emerald-50 border border-emerald-100" role="alert">
                 <i class="me-2 mt-0.5 sm:mt-0 fas fa-check"></i>
                 <p><span class="font-medium me-1">Sukses!</span> {{session('success_apk')}}</p>
             </div>
@@ -566,9 +601,9 @@
                 @endphp
 
                 @if(!empty($apkData['filename']))
-                    <div class="flex items-center justify-between gap-4 p-4 border border-gray-200 rounded-lg mb-4">
+                    <div class="flex items-center justify-between gap-4 p-4 bg-gray-50 border border-gray-100 rounded-2xl mb-4">
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-11 h-11 rounded-lg bg-brand-soft flex items-center justify-center shrink-0">
+                            <div class="w-11 h-11 rounded-xl bg-brand-soft flex items-center justify-center shrink-0">
                                 <i class="fab fa-android text-brand text-lg"></i>
                             </div>
                             <div class="min-w-0">
@@ -585,11 +620,11 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <a href="{{ route('app.download') }}" class="bg-brand-light hover:bg-brand-strong text-white text-sm font-medium py-2 px-4 rounded-base"><i class="fas fa-download"></i> Unduh</a>
+                            <a href="{{ route('app.download') }}" class="bg-brand hover:bg-brand-strong text-white text-sm font-semibold py-2 px-4 rounded-xl shadow-sm shadow-brand/20 transition-all active:scale-[0.98]"><i class="fas fa-download"></i> Unduh</a>
                             <form method="POST" action="{{ route('settings.apk.delete') }}" onsubmit="return confirm('Hapus APK yang sedang aktif? Pengguna tidak akan bisa mengunduh aplikasi sampai Anda unggah yang baru.');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="bg-danger-soft hover:bg-danger-medium text-fg-danger-strong text-sm font-medium py-2 px-4 rounded-base"><i class="fas fa-trash"></i> Hapus</button>
+                                <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold py-2 px-4 rounded-xl transition-all active:scale-[0.98]"><i class="fas fa-trash"></i> Hapus</button>
                             </form>
                         </div>
                     </div>
@@ -599,18 +634,18 @@
                     @csrf
                     <div class="form-group flex-col w-full">
                         <label for="apk_file" class="text-sm font-medium text-gray-700 mb-1 block">File APK</label>
-                        <input type="file" name="apk_file" id="apk_file" accept=".apk" class="w-full px-5 py-3 rounded focus:outline-none @error('apk_file') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" />
+                        <input type="file" name="apk_file" id="apk_file" accept=".apk" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft @error('apk_file') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all @enderror" />
                         @error('apk_file')
                             <p class="text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="form-group flex-col w-full">
                         <label for="version" class="text-sm font-medium text-gray-700 mb-1 block">Versi (opsional, contoh: 1.0.0)</label>
-                        <input type="text" name="version" id="version" placeholder="1.0.0" class="w-full px-5 py-3 rounded focus:outline-none focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default" value="{{ old('version') }}" />
+                        <input type="text" name="version" id="version" placeholder="1.0.0" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all" value="{{ old('version') }}" />
                     </div>
                     <div class="form-group flex-col w-full">
                         <label for="version_code" class="text-sm font-medium text-gray-700 mb-1 block">Version Code (wajib untuk cek update otomatis)</label>
-                        <input type="number" name="version_code" id="version_code" min="1" placeholder="Samakan dengan versionCode di build.gradle.kts" class="w-full px-5 py-3 rounded focus:outline-none @error('version_code') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand-subtle bg-neutral-primary-soft focus:bg-brand-softer placeholder-gray-500 border border-default @enderror" value="{{ old('version_code') }}" />
+                        <input type="number" name="version_code" id="version_code" min="1" placeholder="Samakan dengan versionCode di build.gradle.kts" class="w-full px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-soft @error('version_code') focus:border-danger-subtle bg-danger-soft focus:bg-danger-medium placeholder-danger-strong border-danger @else focus:border-brand bg-gray-50 focus:bg-white placeholder-gray-400 border border-gray-200 transition-all @enderror" value="{{ old('version_code') }}" />
                         @error('version_code')
                             <p class="text-sm text-red-500">{{ $message }}</p>
                         @enderror
