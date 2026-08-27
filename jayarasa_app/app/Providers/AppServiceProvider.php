@@ -37,7 +37,8 @@ class AppServiceProvider extends ServiceProvider
             'manage_attendance',
             'manage_users',
             'manage_cashflow',
-            'view_kitchen_queue'
+            'view_kitchen_queue',
+            'manage_stock'
         ];
 
         foreach ($permissions as $permission) {

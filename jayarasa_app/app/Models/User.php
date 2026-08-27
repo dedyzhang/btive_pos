@@ -71,11 +71,11 @@ class User extends Authenticatable
         $roleRecord = \App\Models\Role::where('name', $this->role)->first();
         if (!$roleRecord) {
             if ($this->role === 'cashier' || $this->role === 'kasir') {
-                $cashierPermissions = ['access_cashier', 'view_reports'];
+                $cashierPermissions = ['access_cashier', 'view_reports', 'manage_stock'];
                 return in_array($permission, $cashierPermissions);
             }
             if ($this->role === 'dapur') {
-                $dapurPermissions = ['view_kitchen_queue'];
+                $dapurPermissions = ['view_kitchen_queue', 'manage_stock'];
                 return in_array($permission, $dapurPermissions);
             }
             return false;

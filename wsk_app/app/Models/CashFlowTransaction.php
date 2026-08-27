@@ -23,6 +23,7 @@ class CashFlowTransaction extends Model
         'transaction_date',
         'description',
         'reference',
+        'purchase_request_id',
         'is_sales_reconciliation',
         'reconciliation_date',
         'items',
@@ -56,5 +57,13 @@ class CashFlowTransaction extends Model
     public function category() : BelongsTo
     {
         return $this->belongsTo(CashFlowCategory::class, 'category_id', 'uuid');
+    }
+
+    /**
+     * The shopping-list request this purchase fulfills, if any.
+     */
+    public function purchaseRequest() : BelongsTo
+    {
+        return $this->belongsTo(PurchaseRequest::class, 'purchase_request_id', 'uuid');
     }
 }

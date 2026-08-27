@@ -16,6 +16,10 @@ use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\FcmTokenController;
 use App\Http\Controllers\AppDownloadController;
+use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\SupplyItemController;
+use App\Http\Controllers\ProductRecipeController;
+use App\Http\Controllers\StockOpnameController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -109,6 +113,37 @@ Route::middleware('permission:access_cashier')->controller(TransactionsControlle
     Route::post('/transaction/{uuid}/payment','proceedPaymentTransaction')->name('transaction.payment.proceed');
     Route::post('/transaction/{uuid}/payment/finalize','finalizePayment')->name('transaction.payment.finalize');
     Route::get('/transaction/{uuid}/payment/receipt','printReceipt')->name('transaction.print.payment');
+});
+
+// Pengajuan belanja stok & stock opname — cashier/kitchen can submit these day-to-day,
+// admin approves purchases into stock and can delete history.
+Route::middleware('permission:manage_stock')->group(function() {
+    Route::get('/purchase-request',[PurchaseRequestController::class,'index'])->name('purchase-request.index');
+    Route::post('/purchase-request',[PurchaseRequestController::class,'store'])->name('purchase-request.store');
+
+    Route::get('/stock-opname',[StockOpnameController::class,'index'])->name('stock-opname.index');
+    Route::post('/stock-opname',[StockOpnameController::class,'store'])->name('stock-opname.store');
+});
+
+// Approving a request adds stock, and editing master supplies changes what can be requested —
+// both are admin-only on purpose.
+Route::middleware('permission:access_admin_dashboard')->group(function() {
+    Route::post('/purchase-request/{uuid}/purchased',[PurchaseRequestController::class,'markPurchased'])->name('purchase-request.purchased');
+    Route::post('/purchase-request/{uuid}/cancel',[PurchaseRequestController::class,'cancel'])->name('purchase-request.cancel');
+    Route::delete('/purchase-request/{uuid}',[PurchaseRequestController::class,'destroy'])->name('purchase-request.destroy');
+
+    Route::delete('/stock-opname/{uuid}',[StockOpnameController::class,'destroy'])->name('stock-opname.destroy');
+
+    Route::get('/product-recipe',[ProductRecipeController::class,'index'])->name('product-recipe.index');
+    Route::post('/product-recipe',[ProductRecipeController::class,'store'])->name('product-recipe.store');
+    Route::put('/product-recipe/{uuid}',[ProductRecipeController::class,'update'])->name('product-recipe.update');
+    Route::delete('/product-recipe/{uuid}',[ProductRecipeController::class,'destroy'])->name('product-recipe.destroy');
+
+    Route::get('/supply-item',[SupplyItemController::class,'index'])->name('supply-item.index');
+    Route::post('/supply-item',[SupplyItemController::class,'store'])->name('supply-item.store');
+    Route::put('/supply-item/{uuid}',[SupplyItemController::class,'update'])->name('supply-item.update');
+    Route::post('/supply-item/{uuid}/toggle',[SupplyItemController::class,'toggleActive'])->name('supply-item.toggle');
+    Route::delete('/supply-item/{uuid}',[SupplyItemController::class,'destroy'])->name('supply-item.destroy');
 });
 
 Route::middleware('permission:view_reports')->controller(ActivityController::class)->group(function() {

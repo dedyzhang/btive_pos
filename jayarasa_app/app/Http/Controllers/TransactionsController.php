@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProductRecipe;
 use App\Models\Products;
 use App\Models\Settings;
+use App\Models\SupplyItem;
 use App\Models\TransactionDetails;
 use App\Models\Transactions;
 use App\Models\User;
 use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Mike42\Escpos\EscposImage;
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
@@ -283,6 +286,11 @@ class TransactionsController extends Controller
             $tax = $tax_setting && $tax_setting->nilai != null && $tax_setting->nilai > 0 ? ($total * $tax_setting->nilai) / 100 : 0;
             $totalwithtax = $total + $tax;
             
+            // Capture before the update: this endpoint has no guard of its own, so a
+            // double-click or a retried request would otherwise deduct ingredients — and
+            // fire the "new order" push — twice for the same order.
+            $isFirstSubmit = $transaction->status === 'active';
+
             $transaction->update([
                 'status' => 'process',
                 'kitchen_status' => 'cooking',
@@ -291,10 +299,59 @@ class TransactionsController extends Controller
                 'total' => $totalwithtax
             ]);
 
-            app(FcmService::class)->notifyNewOrder($transaction);
+            if ($isFirstSubmit) {
+                $this->deductRecipeStock($transaction);
+                app(FcmService::class)->notifyNewOrder($transaction);
+            }
         }
         return response()->json(['success' => true]);
     }
+    /**
+     * Deduct recipe ingredients from supply stock for every menu item in the order.
+     *
+     * Runs when the order reaches the kitchen (not at payment), because that's when the
+     * ingredients are physically used — an order cancelled after cooking has still consumed
+     * them. Stock is allowed to go negative on purpose: refusing to submit an order because
+     * a number says zero would block service, and a negative figure is itself a useful signal
+     * that a purchase went unrecorded.
+     */
+    private function deductRecipeStock(Transactions $transaction): void
+    {
+        try {
+            $productIds = $transaction->orderItem->pluck('product_id')->filter()->unique();
+
+            if ($productIds->isEmpty()) {
+                return; // manual items only — nothing has a recipe
+            }
+
+            $recipesByProduct = ProductRecipe::whereIn('product_id', $productIds)->get()->groupBy('product_id');
+
+            if ($recipesByProduct->isEmpty()) {
+                return; // no recipes defined yet
+            }
+
+            // Aggregate first so an ingredient shared by several menu items is written once.
+            $deductions = [];
+            foreach ($transaction->orderItem as $orderItem) {
+                if (!$orderItem->product_id) {
+                    continue;
+                }
+                foreach ($recipesByProduct[$orderItem->product_id] ?? [] as $recipe) {
+                    $used = (float) $recipe->qty * (float) $orderItem->qty;
+                    $deductions[$recipe->supply_item_id] = ($deductions[$recipe->supply_item_id] ?? 0) + $used;
+                }
+            }
+
+            foreach ($deductions as $supplyItemId => $qty) {
+                // decrement() is atomic, so concurrent orders can't lose an update.
+                SupplyItem::where('uuid', $supplyItemId)->decrement('stock', $qty);
+            }
+        } catch (\Throwable $e) {
+            // Stock bookkeeping must never block getting an order to the kitchen.
+            Log::error('Recipe stock deduction failed for transaction ' . $transaction->uuid . ': ' . $e->getMessage());
+        }
+    }
+
     /**
      * Payment Transaction
      */

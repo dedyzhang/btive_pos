@@ -122,6 +122,58 @@
                         </li>
                     @endcan
 
+                    <!-- Pengajuan Belanja Stok -->
+                    @can('manage_stock')
+                        @php $purchaseRequestActive = request()->routeIs('purchase-request.*'); @endphp
+                        <li class="mx-3 my-0.5">
+                            <a href="{{ route('purchase-request.index') }}" class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer {{ $purchaseRequestActive ? 'bg-brand text-white shadow-lg shadow-brand/15 font-bold' : 'text-gray-600 hover:text-brand hover:bg-brand/5 font-semibold' }}">
+                                <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shrink-0 {{ $purchaseRequestActive ? 'bg-white/20 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand' }}">
+                                    <i class="fas fa-cart-shopping text-sm"></i>
+                                </div>
+                                <span class="text-xs tracking-wide">Pengajuan Belanja</span>
+                            </a>
+                        </li>
+                    @endcan
+
+                    <!-- Stock Opname -->
+                    @can('manage_stock')
+                        @php $opnameActive = request()->routeIs('stock-opname.*'); @endphp
+                        <li class="mx-3 my-0.5">
+                            <a href="{{ route('stock-opname.index') }}" class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer {{ $opnameActive ? 'bg-brand text-white shadow-lg shadow-brand/15 font-bold' : 'text-gray-600 hover:text-brand hover:bg-brand/5 font-semibold' }}">
+                                <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shrink-0 {{ $opnameActive ? 'bg-white/20 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand' }}">
+                                    <i class="fas fa-clipboard-check text-sm"></i>
+                                </div>
+                                <span class="text-xs tracking-wide">Stock Opname</span>
+                            </a>
+                        </li>
+                    @endcan
+
+                    <!-- Resep & HPP (admin) -->
+                    @can('admin')
+                        @php $recipeActive = request()->routeIs('product-recipe.*'); @endphp
+                        <li class="mx-3 my-0.5">
+                            <a href="{{ route('product-recipe.index') }}" class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer {{ $recipeActive ? 'bg-brand text-white shadow-lg shadow-brand/15 font-bold' : 'text-gray-600 hover:text-brand hover:bg-brand/5 font-semibold' }}">
+                                <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shrink-0 {{ $recipeActive ? 'bg-white/20 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand' }}">
+                                    <i class="fas fa-utensils text-sm"></i>
+                                </div>
+                                <span class="text-xs tracking-wide">Resep &amp; HPP</span>
+                            </a>
+                        </li>
+                    @endcan
+
+                    <!-- Master Barang / Stok (admin) -->
+                    @can('admin')
+                        @php $supplyItemActive = request()->routeIs('supply-item.*'); @endphp
+                        <li class="mx-3 my-0.5">
+                            <a href="{{ route('supply-item.index') }}" class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer {{ $supplyItemActive ? 'bg-brand text-white shadow-lg shadow-brand/15 font-bold' : 'text-gray-600 hover:text-brand hover:bg-brand/5 font-semibold' }}">
+                                <div class="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 shrink-0 {{ $supplyItemActive ? 'bg-white/20 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-brand/10 group-hover:text-brand' }}">
+                                    <i class="fas fa-warehouse text-sm"></i>
+                                </div>
+                                <span class="text-xs tracking-wide">Master Barang</span>
+                            </a>
+                        </li>
+                    @endcan
+
                 <!-- 4. Absensi Staf -->
                 <li class="mx-3 my-0.5 btn-open-attendance">
                     <div class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer text-gray-600 hover:text-brand hover:bg-brand/5 font-semibold">

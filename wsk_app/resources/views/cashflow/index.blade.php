@@ -57,7 +57,7 @@
             </div>
 
             <!-- Metric 2: Pemasukan Bulan Ini -->
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/50 flex flex-col justify-between hover:border-emerald-100 transition-all duration-200 relative overflow-hidden group">
+            <div id="btn-show-income-breakdown" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/50 flex flex-col justify-between hover:border-emerald-100 transition-all duration-200 relative overflow-hidden group cursor-pointer hover:shadow-xl hover:shadow-emerald-100">
                 <div class="absolute right-6 top-6 w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-arrow-trend-up"></i>
                 </div>
@@ -71,7 +71,7 @@
             </div>
 
             <!-- Metric 3: Pengeluaran Bulan Ini -->
-            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/50 flex flex-col justify-between hover:border-rose-100 transition-all duration-200 relative overflow-hidden group">
+            <div id="btn-show-expense-breakdown" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg shadow-gray-100/50 flex flex-col justify-between hover:border-rose-100 transition-all duration-200 relative overflow-hidden group cursor-pointer hover:shadow-xl hover:shadow-rose-100">
                 <div class="absolute right-6 top-6 w-10 h-10 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-arrow-trend-down"></i>
                 </div>
@@ -286,6 +286,7 @@
                                                 data-operational-expense="{{ $trx->operational_expense }}"
                                                 data-cash-drawer-amount="{{ $trx->cash_drawer_amount }}"
                                                 data-purchase-place="{{ $trx->purchase_place }}"
+                                                data-purchase-request-id="{{ $trx->purchase_request_id }}"
                                                 data-items="{{ json_encode($trx->items) }}"
                                                 title="Edit Transaksi">
                                                 <i class="fas fa-pen-to-square"></i>
@@ -658,6 +659,18 @@
                             <input type="text" name="purchase_place" id="purchase_place" placeholder="Misal: Toko Makmur, Indomaret, Superindo" class="w-full px-3.5 py-2 bg-white rounded-xl border border-rose-200 text-sm focus:outline-none focus:border-rose-400 font-semibold text-gray-700">
                         </div>
 
+                        <!-- Tutup Pengajuan Belanja -->
+                        <div class="form-group flex flex-col gap-1">
+                            <label for="trx_purchase_request" class="text-xs font-bold text-rose-950 uppercase tracking-wider">Tutup Pengajuan Belanja (Opsional)</label>
+                            <select name="purchase_request_id" id="trx_purchase_request" class="w-full px-3.5 py-2 bg-white rounded-xl border border-rose-200 text-sm focus:outline-none focus:border-rose-400 font-semibold text-gray-700">
+                                <option value="">-- Tidak terkait pengajuan --</option>
+                                @foreach($pendingPurchaseRequests as $pr)
+                                    <option value="{{ $pr->uuid }}">{{ $pr->request_date->format('d M Y') }} &mdash; {{ $pr->items->pluck('item_name')->implode(', ') }}</option>
+                                @endforeach
+                            </select>
+                            <p class="text-[10px] text-rose-500">Pilih kalau pembelian ini memenuhi pengajuan yang masih pending &mdash; rincian barang otomatis terisi & pengajuan ditandai selesai.</p>
+                        </div>
+
                         <!-- Modern Table-like Container -->
                         <div class="border border-rose-100 rounded-xl bg-white shadow-sm mt-1">
                             <!-- Table Header -->
@@ -921,6 +934,14 @@
             const incomeCategories = @json($incomeCategories);
             const expenseCategories = @json($expenseCategories);
             const historicalItems = @json($historicalItemNames);
+            const activeSupplyItems = @json($activeSupplyItems);
+            const pendingPurchaseRequestsData = @json($pendingPurchaseRequestsData);
+
+            function escapeHtml(str) {
+                return String(str).replace(/[&<>"']/g, function(c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
 
             function populateCategories(type, selectedCategoryId = null) {
                 const categorySelect = $('#trx_category');
@@ -1121,6 +1142,7 @@
                 const operationalExpense = btn.data('operational-expense');
                 const cashDrawerAmount = btn.data('cash-drawer-amount');
                 const purchasePlace = btn.data('purchase-place');
+                const purchaseRequestId = btn.data('purchase-request-id');
 
                 function decodeHtmlEntities(str) {
                     if (!str) return '';
@@ -1174,7 +1196,10 @@
                 // 6. Handle shopping items (for expense)
                 if (type === 'expense') {
                     $('#purchase_place').val(purchasePlace);
-                    
+                    // Set without triggering 'change' — that handler wipes and re-fills the item
+                    // rows, which would clobber the ones we're about to load from data-items.
+                    $('#trx_purchase_request').val(purchaseRequestId || '');
+
                     let itemsList = [];
                     let parsedItems = btn.attr('data-items') || btn.data('items');
                     
@@ -1204,8 +1229,13 @@
                         $('#section-shopping-items').removeClass('hidden');
                         $('#shopping-items-list').empty();
                         itemsList.forEach(function(item) {
-                            const rowHtml = createShoppingItemRow(item.name, item.qty, item.price);
+                            const rowId = `shopping-item-row-${itemIndex}`;
+                            const rowHtml = createShoppingItemRow(item.name, item.qty, item.price, item.supply_item_id || '');
                             $('#shopping-items-list').append(rowHtml);
+                            // Stored qty/price are already in the base unit — keep the toggle
+                            // off so the labels don't mislabel them as purchase-unit values.
+                            const supplyItem = item.supply_item_id ? activeSupplyItems.find(si => si.uuid === item.supply_item_id) : null;
+                            if (supplyItem) linkRowToSupplyItem($('#' + rowId), supplyItem, false);
                         });
                         calculateShoppingTotal();
                     }
@@ -1266,8 +1296,9 @@
                 $('#label-shopping-total').text(formatRupiah(0));
                 $('#section-shopping-items').addClass('hidden');
                 
-                // Clear purchase place
+                // Clear purchase place & pengajuan link
                 $('#purchase_place').val('');
+                $('#trx_purchase_request').val('');
 
                 // Populate categories based on selected transaction type
                 populateCategories($('#trx_type').val());
@@ -1307,24 +1338,40 @@
             // Shopping Items Manager Logic
             let itemIndex = 0;
 
-            function createShoppingItemRow(name = '', qty = 1, price = 0) {
+            function createShoppingItemRow(name = '', qty = 1, price = 0, supplyItemId = '') {
                 const rowId = `shopping-item-row-${itemIndex}`;
+                const isLinked = !!supplyItemId;
+                const linkedSupply = isLinked ? activeSupplyItems.find(si => si.uuid === supplyItemId) : null;
+                const searchLabel = linkedSupply ? `${linkedSupply.name} (${linkedSupply.unit})` : '';
+
                 const html = `
                     <div id="${rowId}" class="shopping-item-row grid grid-cols-12 gap-2 items-center px-3 py-3 sm:py-2 bg-white transition-all hover:bg-rose-50/20 relative">
-                        <div class="col-span-12 sm:col-span-6 relative">
-                            <input type="text" name="items[${itemIndex}][name]" autocomplete="off" placeholder="Nama Barang (misal: Beras, Gas)" class="item-name w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-rose-400 bg-gray-50/30 focus:bg-white transition-all font-semibold text-gray-700" required value="${name}">
-                            <div class="autocomplete-dropdown hidden absolute left-0 right-0 top-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 max-h-[160px] overflow-y-auto divide-y divide-gray-50 text-xs font-semibold text-gray-700"></div>
+                        <div class="col-span-12 sm:col-span-6 relative flex flex-col gap-1">
+                            <div class="item-supply-search-wrap relative ${isLinked ? 'hidden' : ''}">
+                                <input type="text" class="item-supply-search w-full px-2 py-1 border border-gray-200 rounded-lg text-[11px] focus:outline-none focus:border-rose-400 bg-white text-gray-500 font-semibold cursor-pointer" placeholder="🔍 Cari dari Master Barang..." autocomplete="off" value="${escapeHtml(searchLabel)}">
+                                <div class="item-supply-dropdown hidden absolute left-0 right-0 top-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 max-h-[200px] overflow-y-auto divide-y divide-gray-50 text-xs font-semibold text-gray-700"></div>
+                            </div>
+                            <div class="relative">
+                                <input type="text" name="items[${itemIndex}][name]" autocomplete="off" placeholder="Nama Barang (misal: Beras, Gas)" class="item-name w-full px-2.5 py-1.5 border rounded-lg text-xs focus:outline-none focus:border-rose-400 transition-all font-semibold text-gray-700 ${isLinked ? 'bg-emerald-50/50 border-emerald-200' : 'bg-gray-50/30 focus:bg-white border-gray-200'}" required value="${name}" ${isLinked ? 'readonly' : ''}>
+                                <div class="autocomplete-dropdown hidden absolute left-0 right-0 top-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 max-h-[160px] overflow-y-auto divide-y divide-gray-50 text-xs font-semibold text-gray-700"></div>
+                                <button type="button" class="btn-unlink-supply-item ${isLinked ? '' : 'hidden'} absolute right-2 top-1/2 -translate-y-1/2 text-emerald-500 hover:text-emerald-700 cursor-pointer bg-transparent border-none text-xs" title="Ganti barang">
+                                    <i class="fas fa-xmark"></i>
+                                </button>
+                            </div>
+                            <input type="hidden" name="items[${itemIndex}][supply_item_id]" class="item-supply-id" value="${supplyItemId}">
                         </div>
                         <div class="col-span-4 sm:col-span-2">
                             <div class="flex items-center gap-1 sm:block">
                                 <span class="text-[10px] text-gray-400 font-bold sm:hidden">Qty:</span>
                                 <input type="number" name="items[${itemIndex}][qty]" placeholder="1" class="item-qty w-full px-1 py-1.5 border border-gray-200 rounded-lg text-xs text-center focus:outline-none focus:border-rose-400 bg-gray-50/30 focus:bg-white transition-all font-mono font-bold text-gray-700" min="0.01" step="any" required value="${qty}">
+                                <p class="item-qty-unit-label text-[9px] text-gray-400 font-semibold mt-0.5 text-center"></p>
                             </div>
                         </div>
                         <div class="col-span-6 sm:col-span-3">
                             <div class="flex items-center gap-1 sm:block">
                                 <span class="text-[10px] text-gray-400 font-bold sm:hidden">Harga:</span>
                                 <input type="number" name="items[${itemIndex}][price]" placeholder="0" class="item-price w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs text-right focus:outline-none focus:border-rose-400 bg-gray-50/30 focus:bg-white transition-all font-mono font-bold text-gray-700" min="0" required value="${price}">
+                                <p class="item-price-unit-label text-[9px] text-gray-400 font-semibold mt-0.5 text-right"></p>
                             </div>
                         </div>
                         <div class="col-span-2 sm:col-span-1 flex items-center justify-center">
@@ -1332,11 +1379,177 @@
                                 <i class="fas fa-trash text-sm"></i>
                             </button>
                         </div>
+                        <div class="item-conversion-toggle col-span-12 hidden" data-conversion="">
+                            <label class="inline-flex items-center gap-1.5 text-[10px] text-indigo-600 font-bold cursor-pointer select-none" title="Qty & harga otomatis dikonversi ke satuan pakai saat disimpan">
+                                <input type="checkbox" class="item-purchase-mode-toggle w-3.5 h-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-400" checked>
+                                <i class="fas fa-repeat"></i>
+                                <span>Per <span class="purchase-unit-name"></span> <span class="text-indigo-300">(bukan per <span class="usage-unit-name"></span>)</span></span>
+                            </label>
+                        </div>
                     </div>
                 `;
                 itemIndex++;
                 return html;
             }
+
+            // Reflect the row's current unit mode (purchase unit vs. base/usage unit) in the
+            // small captions under the qty and price fields.
+            function updateUnitLabels(row) {
+                const toggle = row.find('.item-conversion-toggle');
+                const supplyItem = row.data('linkedSupplyItem');
+                let qtyUnit = '';
+                let priceUnit = '';
+
+                if (supplyItem && !toggle.hasClass('hidden') && row.find('.item-purchase-mode-toggle').is(':checked')) {
+                    qtyUnit = supplyItem.purchase_unit;
+                    priceUnit = '/' + supplyItem.purchase_unit;
+                } else if (supplyItem) {
+                    qtyUnit = supplyItem.unit;
+                    priceUnit = '/' + supplyItem.unit;
+                }
+
+                row.find('.item-qty-unit-label').text(qtyUnit);
+                row.find('.item-price-unit-label').text(priceUnit);
+            }
+
+            // Picking a Master Barang item locks the name field to it (so stock/price update
+            // on save); switching back to "Custom" frees the name field for manual typing again.
+            // defaultPurchaseMode=true is for a fresh pick from the search box (the friendly
+            // default). Rows rebuilt from already-stored qty/price (editing a transaction) pass
+            // false, since those numbers are already in the base unit and must stay labeled that
+            // way — flipping the toggle would relabel the units without converting the numbers.
+            function linkRowToSupplyItem(row, supplyItem, defaultPurchaseMode = true) {
+                const nameInput = row.find('.item-name');
+                const hiddenId = row.find('.item-supply-id');
+                const searchInput = row.find('.item-supply-search');
+                const searchWrap = row.find('.item-supply-search-wrap');
+                const unlinkBtn = row.find('.btn-unlink-supply-item');
+                const toggleWrap = row.find('.item-conversion-toggle');
+                const toggleCheckbox = row.find('.item-purchase-mode-toggle');
+
+                row.data('linkedSupplyItem', supplyItem || null);
+
+                if (supplyItem) {
+                    nameInput.val(supplyItem.name).prop('readonly', true)
+                        .removeClass('bg-gray-50/30 border-gray-200').addClass('bg-emerald-50/50 border-emerald-200');
+                    hiddenId.val(supplyItem.uuid);
+                    searchInput.val(`${supplyItem.name} (${supplyItem.unit})`);
+                    // The search box did its job — hide it so the row shows just the one
+                    // resolved name field, with a small ✕ to reopen it if they want to change.
+                    searchWrap.addClass('hidden');
+                    unlinkBtn.removeClass('hidden');
+
+                    const hasConversion = supplyItem.purchase_unit && parseFloat(supplyItem.purchase_conversion) > 0;
+                    if (hasConversion) {
+                        toggleWrap.removeClass('hidden').attr('data-conversion', supplyItem.purchase_conversion);
+                        toggleWrap.find('.purchase-unit-name').text(supplyItem.purchase_unit);
+                        toggleWrap.find('.usage-unit-name').text(supplyItem.unit);
+                        toggleCheckbox.prop('checked', defaultPurchaseMode);
+                    } else {
+                        toggleWrap.addClass('hidden');
+                    }
+
+                    // Prefill with the last known price as a starting point — admin still
+                    // corrects it to whatever was actually paid this time. Shown in whichever
+                    // unit is currently active (purchase unit by default, when available).
+                    const priceInput = row.find('.item-price');
+                    if (!parseFloat(priceInput.val())) {
+                        const usePurchaseMode = hasConversion && defaultPurchaseMode;
+                        const startingPrice = usePurchaseMode ? supplyItem.unit_price * parseFloat(supplyItem.purchase_conversion) : supplyItem.unit_price;
+                        priceInput.val(startingPrice);
+                        calculateShoppingTotal();
+                    }
+                } else {
+                    nameInput.val('').prop('readonly', false)
+                        .removeClass('bg-emerald-50/50 border-emerald-200').addClass('bg-gray-50/30 border-gray-200');
+                    hiddenId.val('');
+                    searchInput.val('');
+                    searchWrap.removeClass('hidden');
+                    unlinkBtn.addClass('hidden');
+                    toggleWrap.addClass('hidden');
+                }
+
+                updateUnitLabels(row);
+            }
+
+            // Toggling the unit mode only relabels the fields — the actual conversion of
+            // whatever numbers are currently typed happens once, at submit time.
+            $(document).on('change', '.item-purchase-mode-toggle', function() {
+                updateUnitLabels($(this).closest('.shopping-item-row'));
+            });
+
+            function renderSupplyDropdown(dropdown, query) {
+                const q = (query || '').toLowerCase().trim();
+                const matches = activeSupplyItems.filter(si => si.name.toLowerCase().includes(q));
+
+                let html = `<div class="item-supply-option px-3 py-2 hover:bg-rose-50 hover:text-rose-700 cursor-pointer transition-colors text-gray-500 italic" data-uuid="">+ Barang Custom (ketik manual)</div>`;
+                if (matches.length > 0) {
+                    matches.forEach(function(si) {
+                        html += `<div class="item-supply-option px-3 py-2 hover:bg-rose-50 hover:text-rose-700 cursor-pointer transition-colors" data-uuid="${si.uuid}">${escapeHtml(si.name)} <span class="text-gray-400 font-normal">(${escapeHtml(si.unit)})</span></div>`;
+                    });
+                } else if (q !== '') {
+                    html += `<div class="px-3 py-2 text-gray-400 italic">Tidak ada barang cocok "${escapeHtml(query)}"</div>`;
+                }
+                dropdown.html(html).removeClass('hidden');
+            }
+
+            // Open the dropdown (showing everything) on focus/click
+            $(document).on('focus click', '.item-supply-search', function() {
+                const dropdown = $(this).siblings('.item-supply-dropdown');
+                renderSupplyDropdown(dropdown, '');
+            });
+
+            // Filter the dropdown as the admin types
+            $(document).on('input keyup', '.item-supply-search', function() {
+                const dropdown = $(this).siblings('.item-supply-dropdown');
+                renderSupplyDropdown(dropdown, $(this).val());
+            });
+
+            // Pick an item (or "Custom") from the dropdown
+            $(document).on('mousedown', '.item-supply-option', function(e) {
+                e.preventDefault(); // Keep the search input's blur from firing before this click lands
+                const row = $(this).closest('.shopping-item-row');
+                const uuid = $(this).data('uuid');
+                const supplyItem = uuid ? activeSupplyItems.find(si => si.uuid === uuid) : null;
+
+                linkRowToSupplyItem(row, supplyItem);
+                $(this).closest('.item-supply-dropdown').addClass('hidden');
+            });
+
+            // Hide the dropdown on blur
+            $(document).on('blur', '.item-supply-search', function() {
+                const dropdown = $(this).siblings('.item-supply-dropdown');
+                setTimeout(() => dropdown.addClass('hidden'), 200);
+            });
+
+            // Picking a pending shopping-list request pre-fills the item rows (name + qty +
+            // Master Barang link) from that request, so the admin only needs to fill in price.
+            $('#trx_purchase_request').on('change', function() {
+                const prUuid = $(this).val();
+                if (!prUuid || !pendingPurchaseRequestsData[prUuid]) return;
+
+                $('#shopping-items-list').empty();
+                itemIndex = 0;
+                pendingPurchaseRequestsData[prUuid].forEach(function(item) {
+                    const supplyItem = activeSupplyItems.find(si => si.uuid === item.supply_item_id);
+                    const startingPrice = supplyItem ? supplyItem.unit_price : 0;
+                    const rowId = `shopping-item-row-${itemIndex}`;
+                    $('#shopping-items-list').append(createShoppingItemRow(item.name, item.qty, startingPrice, item.supply_item_id || ''));
+                    // qty here came from the pending request, already in the base unit — keep
+                    // the toggle off so the labels line up with what's actually in the field.
+                    if (supplyItem) linkRowToSupplyItem($('#' + rowId), supplyItem, false);
+                });
+                $('#section-shopping-items').removeClass('hidden');
+                calculateShoppingTotal();
+            });
+
+            // "✕" next to a linked item's name reopens the Master Barang search so it can be
+            // swapped for a different item (or cleared back to a free-text custom entry).
+            $(document).on('click', '.btn-unlink-supply-item', function() {
+                const row = $(this).closest('.shopping-item-row');
+                linkRowToSupplyItem(row, null);
+                row.find('.item-supply-search').focus();
+            });
 
             // Custom Autocomplete Dropdown Logic
             $(document).on('keyup focus', '.item-name', function() {
@@ -1414,6 +1627,26 @@
             // Input listener on shopping item fields for live recalculations
             $(document).on('change keyup', '.item-qty, .item-price', function() {
                 calculateShoppingTotal();
+            });
+
+            // Convert purchase-unit rows to base-unit numbers right before the form actually
+            // submits — this is the one point where "3 batang @ Rp8.000" becomes "48 keping @
+            // Rp500" for storage, so stock and HPP costing stay in the base unit everywhere else.
+            $('#form-transaction').on('submit', function() {
+                $('.shopping-item-row').each(function() {
+                    const row = $(this);
+                    const toggleWrap = row.find('.item-conversion-toggle');
+                    if (toggleWrap.hasClass('hidden') || !row.find('.item-purchase-mode-toggle').is(':checked')) return;
+
+                    const conversion = parseFloat(toggleWrap.attr('data-conversion')) || 1;
+                    const qtyInput = row.find('.item-qty');
+                    const priceInput = row.find('.item-price');
+                    const qty = parseFloat(qtyInput.val()) || 0;
+                    const price = parseFloat(priceInput.val()) || 0;
+
+                    qtyInput.val((qty * conversion).toFixed(4));
+                    priceInput.val(Math.round(price / conversion));
+                });
             });
 
             // View shopping items details button click handler
@@ -1747,7 +1980,70 @@
             }
         });
     </script>
-    <!-- Floating Action Button (FAB) for adding cash transaction -->
+    
+        <!-- Modal Income Breakdown -->
+        <div id="modal-income-breakdown" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/60 backdrop-blur-[2px]">
+            <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 border border-gray-100 flex flex-col p-6 m-4">
+                <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                            <i class="fas fa-arrow-trend-up"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-800 tracking-wide">Pemasukan per Kategori</h3>
+                    </div>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center cursor-pointer btn-close-income-breakdown border-none outline-none bg-transparent">
+                        <i class="fas fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    @forelse($monthlyIncomeByCategory as $cat => $total)
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
+                        <span class="text-sm font-semibold text-gray-700">{{ $cat }}</span>
+                        <span class="text-sm font-bold text-emerald-600">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                    </div>
+                    @empty
+                    <div class="text-center py-4 text-gray-400 text-sm">Tidak ada data pemasukan bulan ini</div>
+                    @endforelse
+                </div>
+                <div class="mt-5 pt-3 border-t border-gray-100 flex justify-between items-center">
+                    <span class="font-bold text-gray-500 text-xs uppercase">Total Pemasukan</span>
+                    <span class="font-black text-lg text-emerald-600">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Expense Breakdown -->
+        <div id="modal-expense-breakdown" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full h-full bg-black/60 backdrop-blur-[2px]">
+            <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 border border-gray-100 flex flex-col p-6 m-4">
+                <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center">
+                            <i class="fas fa-arrow-trend-down"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-800 tracking-wide">Pengeluaran per Kategori</h3>
+                    </div>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center cursor-pointer btn-close-expense-breakdown border-none outline-none bg-transparent">
+                        <i class="fas fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    @forelse($monthlyExpenseByCategory as $cat => $total)
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
+                        <span class="text-sm font-semibold text-gray-700">{{ $cat }}</span>
+                        <span class="text-sm font-bold text-rose-600">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                    </div>
+                    @empty
+                    <div class="text-center py-4 text-gray-400 text-sm">Tidak ada data pengeluaran bulan ini</div>
+                    @endforelse
+                </div>
+                <div class="mt-5 pt-3 border-t border-gray-100 flex justify-between items-center">
+                    <span class="font-bold text-gray-500 text-xs uppercase">Total Pengeluaran</span>
+                    <span class="font-black text-lg text-rose-600">Rp {{ number_format($monthlyExpense, 0, ',', '.') }}</span>
+                </div>
+            </div>
+        </div>
+
+<!-- Floating Action Button (FAB) for adding cash transaction -->
     <button type="button" class="btn-add-transaction group" style="position: fixed; bottom: 32px; right: 32px; z-index: 999; width: 56px; height: 56px; background-color: #4f46e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.4); cursor: pointer; transition: all 0.2s ease-in-out;" title="Catat Transaksi Kas" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
         <i class="fas fa-plus" style="font-size: 20px;"></i>
     </button>

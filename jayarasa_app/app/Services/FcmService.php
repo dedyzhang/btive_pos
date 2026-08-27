@@ -89,16 +89,21 @@ class FcmService
     }
 
     /**
-     * Notify cashier and kitchen devices that a new order has come in (currently: a customer
-     * self-order via QR code — the one case where neither of them created the order themselves).
+     * Notify cashier, kitchen AND admin devices that a new order has come in — fired both when
+     * a customer self-orders via QR and when a cashier submits an order to the kitchen.
+     * Admins are included so the owner can follow incoming orders without watching the POS.
      */
     public function notifyNewOrder(Transactions $transaction): void
     {
         try {
-            $tokens = DeviceToken::whereIn('user_id', $this->cashierAndKitchenUserIds())->pluck('fcm_token', 'id');
+            $recipientIds = $this->cashierAndKitchenUserIds()
+                ->merge($this->adminUserIds())
+                ->unique();
+
+            $tokens = DeviceToken::whereIn('user_id', $recipientIds)->pluck('fcm_token', 'id');
 
             if ($tokens->isEmpty()) {
-                Log::info('FCM notifyNewOrder: no cashier/kitchen device_tokens registered, skipping.');
+                Log::info('FCM notifyNewOrder: no cashier/kitchen/admin device_tokens registered, skipping.');
                 return;
             }
 
@@ -119,6 +124,58 @@ class FcmService
             $this->sendToTokens($tokens, $message);
         } catch (Throwable $e) {
             Log::error('FCM notifyNewOrder failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify admin devices that a cash-in / cash-out entry was recorded in Cashflow.
+     *
+     * Takes primitives rather than the model on purpose: a split sales-reconciliation writes
+     * several rows for a single user action, and we want one notification with the combined
+     * total instead of one push per row.
+     *
+     * @param string $type 'income' or 'expense' — transfers are deliberately not notified,
+     *                     since they only move money between the restaurant's own accounts.
+     */
+    public function notifyCashFlowEntry(string $type, $amount, ?string $accountName = null, ?string $description = null): void
+    {
+        try {
+            if (!in_array($type, ['income', 'expense'], true)) {
+                return;
+            }
+
+            $tokens = DeviceToken::whereIn('user_id', $this->adminUserIds())->pluck('fcm_token', 'id');
+
+            if ($tokens->isEmpty()) {
+                Log::info('FCM notifyCashFlowEntry: no admin device_tokens registered, skipping.');
+                return;
+            }
+
+            $isIncome = $type === 'income';
+            $label = $isIncome ? 'Pemasukan' : 'Pengeluaran';
+            $preposition = $isIncome ? 'ke' : 'dari';
+            $amountFormatted = 'Rp ' . number_format((float) $amount, 0, ',', '.');
+
+            $body = "{$amountFormatted}";
+            if ($accountName) {
+                $body .= " {$preposition} {$accountName}";
+            }
+            if ($description) {
+                $body .= " — {$description}";
+            }
+
+            $message = CloudMessage::new()
+                ->withData([
+                    'type' => 'cashflow_' . $type,
+                    'title' => "{$label} Kas",
+                    'body' => $body,
+                    'amount' => (string) $amount,
+                    'click_action' => route('cashflow.index'),
+                ]);
+
+            $this->sendToTokens($tokens, $message);
+        } catch (Throwable $e) {
+            Log::error('FCM notifyCashFlowEntry failed: ' . $e->getMessage());
         }
     }
 

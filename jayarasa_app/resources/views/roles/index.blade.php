@@ -106,6 +106,13 @@
                                     </div>
                                 </label>
                                 <label class="flex items-start gap-3 cursor-pointer select-none">
+                                    <input type="checkbox" name="permissions[]" value="manage_stock" class="perm-checkbox w-4.5 h-4.5 text-emerald-500 bg-white border-gray-300 rounded focus:ring-emerald-500 focus:ring-2 mt-0.5">
+                                    <div class="text-xs">
+                                        <span class="font-bold text-gray-700 block">Pengajuan Belanja Stok</span>
+                                        <span class="text-gray-400">Mengajukan daftar barang yang perlu dibeli. Menandai sudah dibeli & kelola master barang tetap khusus admin.</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-start gap-3 cursor-pointer select-none">
                                     <input type="checkbox" name="permissions[]" value="manage_users" class="perm-checkbox w-4.5 h-4.5 text-emerald-500 bg-white border-gray-300 rounded focus:ring-emerald-500 focus:ring-2 mt-0.5">
                                     <div class="text-xs">
                                         <span class="font-bold text-gray-700 block">Kelola Users & Role</span>

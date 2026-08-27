@@ -4,10 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\CashFlowAccount;
 use App\Models\CashFlowTransaction;
+use App\Models\PurchaseRequest;
+use App\Models\SupplyItem;
 use App\Models\Transactions;
+use App\Services\FcmService;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CashFlowController extends Controller
 {
@@ -73,6 +78,29 @@ class CashFlowController extends Controller
         $monthlyExpense = CashFlowTransaction::where('type', 'expense')
             ->whereBetween('transaction_date', [$firstDayOfMonth, $lastDayOfMonth])
             ->sum('amount');
+
+        // Breakdown by category for current month
+        $monthlyIncomeByCategory = [];
+        $monthlyExpenseByCategory = [];
+        
+        $currentMonthTransactions = CashFlowTransaction::with('category')
+            ->whereIn('type', ['income', 'expense'])
+            ->whereBetween('transaction_date', [$firstDayOfMonth, $lastDayOfMonth])
+            ->get();
+            
+        foreach($currentMonthTransactions as $trx) {
+            $catName = $trx->category ? $trx->category->name : 'Tanpa Kategori';
+            if ($trx->type == 'income') {
+                if (!isset($monthlyIncomeByCategory[$catName])) $monthlyIncomeByCategory[$catName] = 0;
+                $monthlyIncomeByCategory[$catName] += $trx->amount;
+            } elseif ($trx->type == 'expense') {
+                if (!isset($monthlyExpenseByCategory[$catName])) $monthlyExpenseByCategory[$catName] = 0;
+                $monthlyExpenseByCategory[$catName] += $trx->amount;
+            }
+        }
+        
+        arsort($monthlyIncomeByCategory);
+        arsort($monthlyExpenseByCategory);
 
         // 4. Recent Transactions List
         $transactions = CashFlowTransaction::with(['account', 'destinationAccount', 'category'])
@@ -169,17 +197,44 @@ class CashFlowController extends Controller
             ];
         }
 
+        // For linking a purchase expense to Master Barang (stock+price update) and, optionally,
+        // to a pending shopping-list request it fulfills.
+        $activeSupplyItems = SupplyItem::where('is_active', true)
+            ->orderBy('name', 'asc')
+            ->get(['uuid', 'name', 'unit', 'unit_price', 'purchase_unit', 'purchase_conversion']);
+
+        $pendingPurchaseRequests = PurchaseRequest::with('items')
+            ->where('status', 'pending')
+            ->orderBy('request_date', 'asc')
+            ->get();
+
+        // Pre-fill data for the "Tutup Pengajuan Belanja" picker in the expense form, keyed by
+        // request uuid so the JS can look up its items in one step when a request is selected.
+        $pendingPurchaseRequestsData = [];
+        foreach ($pendingPurchaseRequests as $pr) {
+            $pendingPurchaseRequestsData[$pr->uuid] = $pr->items->map(fn ($i) => [
+                'name' => $i->item_name,
+                'qty' => (float) $i->qty,
+                'supply_item_id' => $i->supply_item_id,
+            ])->values();
+        }
+
         return view('cashflow.index', compact(
-            'accounts', 
-            'totalBalance', 
-            'monthlyIncome', 
-            'monthlyExpense', 
+            'accounts',
+            'totalBalance',
+            'monthlyIncome',
+            'monthlyExpense',
+            'monthlyIncomeByCategory',
+            'monthlyExpenseByCategory',
             'transactions',
             'reconciliations',
             'priceComparisons',
             'incomeCategories',
             'expenseCategories',
-            'historicalItemNames'
+            'historicalItemNames',
+            'activeSupplyItems',
+            'pendingPurchaseRequests',
+            'pendingPurchaseRequestsData'
         ));
     }
 
@@ -248,6 +303,56 @@ class CashFlowController extends Controller
     }
 
     /**
+     * When a Cash Flow expense line is picked from Master Barang, recording the real purchase
+     * becomes the one place stock and price get corrected — bumping stock by the qty bought and
+     * updating unit_price to what was actually paid. If the entry is tagged to a pending
+     * shopping-list request, that request's items are synced to the same qty and closed out.
+     */
+    private function applyPurchaseSideEffects(array $items, ?string $purchaseRequestId): void
+    {
+        $qtyBySupplyItem = [];
+
+        foreach ($items as $item) {
+            if (empty($item['supply_item_id'])) {
+                continue;
+            }
+
+            $supplyItem = SupplyItem::find($item['supply_item_id']);
+            if (!$supplyItem) {
+                continue;
+            }
+
+            $supplyItem->increment('stock', $item['qty']);
+            $supplyItem->update(['unit_price' => (int) $item['price']]);
+
+            $qtyBySupplyItem[$item['supply_item_id']] = $item['qty'];
+        }
+
+        if (!$purchaseRequestId) {
+            return;
+        }
+
+        // Only close a request that's still pending — avoids clobbering one that was already
+        // resolved (e.g. via the separate "Sudah Dibeli" flow) in the time since the form loaded.
+        $purchaseRequest = PurchaseRequest::find($purchaseRequestId);
+        if (!$purchaseRequest || $purchaseRequest->status !== 'pending') {
+            return;
+        }
+
+        foreach ($purchaseRequest->items as $requestItem) {
+            if (isset($qtyBySupplyItem[$requestItem->supply_item_id])) {
+                $requestItem->update(['qty' => $qtyBySupplyItem[$requestItem->supply_item_id]]);
+            }
+        }
+
+        $purchaseRequest->update([
+            'status' => 'purchased',
+            'purchased_at' => now(),
+            'purchased_by' => Auth::id(),
+        ]);
+    }
+
+    /**
      * Store a new Cash Flow Transaction.
      */
     public function storeTransaction(Request $request)
@@ -266,10 +371,12 @@ class CashFlowController extends Controller
             'reference' => 'nullable|string',
             'purchase_place' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:cash_flow_categories,uuid',
+            'purchase_request_id' => 'nullable|exists:purchase_requests,uuid',
             'items' => 'nullable|array',
             'items.*.name' => 'required_with:items|string|max:255',
             'items.*.qty' => 'required_with:items|numeric|min:0.01',
-            'items.*.price' => 'required_with:items|numeric|min:0'
+            'items.*.price' => 'required_with:items|numeric|min:0',
+            'items.*.supply_item_id' => 'nullable|exists:supply_items,uuid'
         ]);
 
         $reconciliationDate = $isSalesReconciliation ? $request->reconciliation_date : null;
@@ -293,7 +400,10 @@ class CashFlowController extends Controller
                         'name' => $item['name'],
                         'qty' => $qty,
                         'price' => $price,
-                        'total' => $qty * $price
+                        'total' => $qty * $price,
+                        // Only set when the row was picked from Master Barang — free-text rows
+                        // stay pure expense records with no stock/price side effect.
+                        'supply_item_id' => $item['supply_item_id'] ?? null
                     ];
                 }
             }
@@ -313,6 +423,10 @@ class CashFlowController extends Controller
             if ($sumSplits != $request->amount) {
                 return redirect()->back()->withErrors(['amount' => 'Total pembagian akun (' . number_format($sumSplits, 0, ',', '.') . ') harus sama dengan Nominal Transaksi (' . number_format($request->amount, 0, ',', '.') . ').'])->withInput();
             }
+
+            // Split writes several rows for one user action — notify once, without naming a
+            // single account since the money lands across several of them.
+            $notifyAccountName = null;
 
             // Create separate transactions for each split
             $first = true;
@@ -339,23 +453,41 @@ class CashFlowController extends Controller
                 return redirect()->back()->withErrors(['account_id' => 'Akun keuangan wajib dipilih jika pembagian nominal kosong.'])->withInput();
             }
 
-            CashFlowTransaction::create([
-                'account_id' => $request->account_id,
-                'destination_account_id' => $request->type === 'transfer' ? $request->destination_account_id : null,
-                'type' => $request->type,
-                'amount' => $request->amount,
-                'operational_expense' => $operationalExpense,
-                'cash_drawer_amount' => $cashDrawerAmount,
-                'transaction_date' => $request->transaction_date,
-                'description' => $request->description,
-                'reference' => $request->reference,
-                'is_sales_reconciliation' => $isSalesReconciliation,
-                'reconciliation_date' => $reconciliationDate,
-                'items' => $items,
-                'purchase_place' => $request->purchase_place,
-                'category_id' => $request->category_id
-            ]);
+            DB::transaction(function () use ($request, $operationalExpense, $cashDrawerAmount, $reconciliationDate, $isSalesReconciliation, $items) {
+                $transaction = CashFlowTransaction::create([
+                    'account_id' => $request->account_id,
+                    'destination_account_id' => $request->type === 'transfer' ? $request->destination_account_id : null,
+                    'type' => $request->type,
+                    'amount' => $request->amount,
+                    'operational_expense' => $operationalExpense,
+                    'cash_drawer_amount' => $cashDrawerAmount,
+                    'transaction_date' => $request->transaction_date,
+                    'description' => $request->description,
+                    'reference' => $request->reference,
+                    'purchase_request_id' => $request->type === 'expense' ? $request->purchase_request_id : null,
+                    'is_sales_reconciliation' => $isSalesReconciliation,
+                    'reconciliation_date' => $reconciliationDate,
+                    'items' => $items,
+                    'purchase_place' => $request->purchase_place,
+                    'category_id' => $request->category_id
+                ]);
+
+                if ($request->type === 'expense' && $items) {
+                    $this->applyPurchaseSideEffects($items, $request->purchase_request_id);
+                }
+            });
+
+            $notifyAccountName = CashFlowAccount::find($request->account_id)?->name;
         }
+
+        // Best-effort push to admin devices; FcmService swallows its own failures so a
+        // notification problem can never block recording the cash entry.
+        app(FcmService::class)->notifyCashFlowEntry(
+            $request->type,
+            $request->amount,
+            $notifyAccountName,
+            $request->description
+        );
 
         return redirect()->route('cashflow.index')->with('success', 'Transaksi kas berhasil dicatat.');
     }
@@ -380,10 +512,12 @@ class CashFlowController extends Controller
             'reference' => 'nullable|string',
             'purchase_place' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:cash_flow_categories,uuid',
+            'purchase_request_id' => 'nullable|exists:purchase_requests,uuid',
             'items' => 'nullable|array',
             'items.*.name' => 'required_with:items|string|max:255',
             'items.*.qty' => 'required_with:items|numeric|min:0.01',
-            'items.*.price' => 'required_with:items|numeric|min:0'
+            'items.*.price' => 'required_with:items|numeric|min:0',
+            'items.*.supply_item_id' => 'nullable|exists:supply_items,uuid'
         ]);
 
         $reconciliationDate = $isSalesReconciliation ? $request->reconciliation_date : null;
@@ -395,7 +529,9 @@ class CashFlowController extends Controller
             return redirect()->back()->withErrors(['reconciliation_date' => 'Tanggal rekonsiliasi wajib diisi jika opsi rekonsiliasi aktif.'])->withInput();
         }
 
-        // Process shopping items if type is expense
+        // Process shopping items if type is expense. Editing an existing entry only corrects the
+        // record itself — stock/price/pengajuan side effects only ever apply once, on create, so
+        // they aren't silently re-applied (or double-applied) whenever a description gets fixed.
         $items = null;
         if ($request->type === 'expense' && $request->has('items') && is_array($request->items)) {
             $filteredItems = [];
@@ -407,7 +543,8 @@ class CashFlowController extends Controller
                         'name' => $item['name'],
                         'qty' => $qty,
                         'price' => $price,
-                        'total' => $qty * $price
+                        'total' => $qty * $price,
+                        'supply_item_id' => $item['supply_item_id'] ?? null
                     ];
                 }
             }
@@ -426,6 +563,7 @@ class CashFlowController extends Controller
             'transaction_date' => $request->transaction_date,
             'description' => $request->description,
             'reference' => $request->reference,
+            'purchase_request_id' => $request->type === 'expense' ? $request->purchase_request_id : null,
             'is_sales_reconciliation' => $isSalesReconciliation,
             'reconciliation_date' => $reconciliationDate,
             'items' => $items,
