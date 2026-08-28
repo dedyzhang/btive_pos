@@ -1978,6 +1978,27 @@
                     minimumFractionDigits: 0
                 }).format(number);
             }
+            // Income/Expense Breakdown Modals
+            $('#btn-show-income-breakdown').on('click', function() {
+                $('#modal-income-breakdown').removeClass('hidden').addClass('flex');
+            });
+            $('.btn-close-income-breakdown').on('click', function() {
+                $('#modal-income-breakdown').addClass('hidden').removeClass('flex');
+            });
+
+            $('#btn-show-expense-breakdown').on('click', function() {
+                $('#modal-expense-breakdown').removeClass('hidden').addClass('flex');
+            });
+            $('.btn-close-expense-breakdown').on('click', function() {
+                $('#modal-expense-breakdown').addClass('hidden').removeClass('flex');
+            });
+            
+            // Close modals when clicking outside
+            $('#modal-income-breakdown, #modal-expense-breakdown').on('click', function(e) {
+                if (e.target === this) {
+                    $(this).addClass('hidden').removeClass('flex');
+                }
+            });
         });
     </script>
     
