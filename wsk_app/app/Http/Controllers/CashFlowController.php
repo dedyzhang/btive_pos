@@ -86,21 +86,29 @@ class CashFlowController extends Controller
         $currentMonthTransactions = CashFlowTransaction::with('category')
             ->whereIn('type', ['income', 'expense'])
             ->whereBetween('transaction_date', [$firstDayOfMonth, $lastDayOfMonth])
+            ->orderBy('transaction_date', 'desc')
             ->get();
             
         foreach($currentMonthTransactions as $trx) {
             $catName = $trx->category ? $trx->category->name : 'Tanpa Kategori';
             if ($trx->type == 'income') {
-                if (!isset($monthlyIncomeByCategory[$catName])) $monthlyIncomeByCategory[$catName] = 0;
-                $monthlyIncomeByCategory[$catName] += $trx->amount;
+                if (!isset($monthlyIncomeByCategory[$catName])) {
+                    $monthlyIncomeByCategory[$catName] = ['total' => 0, 'transactions' => []];
+                }
+                $monthlyIncomeByCategory[$catName]['total'] += $trx->amount;
+                $monthlyIncomeByCategory[$catName]['transactions'][] = $trx;
             } elseif ($trx->type == 'expense') {
-                if (!isset($monthlyExpenseByCategory[$catName])) $monthlyExpenseByCategory[$catName] = 0;
-                $monthlyExpenseByCategory[$catName] += $trx->amount;
+                if (!isset($monthlyExpenseByCategory[$catName])) {
+                    $monthlyExpenseByCategory[$catName] = ['total' => 0, 'transactions' => []];
+                }
+                $monthlyExpenseByCategory[$catName]['total'] += $trx->amount;
+                $monthlyExpenseByCategory[$catName]['transactions'][] = $trx;
             }
         }
         
-        arsort($monthlyIncomeByCategory);
-        arsort($monthlyExpenseByCategory);
+        // Sort by total amount
+        uasort($monthlyIncomeByCategory, function($a, $b) { return $b['total'] <=> $a['total']; });
+        uasort($monthlyExpenseByCategory, function($a, $b) { return $b['total'] <=> $a['total']; });
 
         // 4. Recent Transactions List
         $transactions = CashFlowTransaction::with(['account', 'destinationAccount', 'category'])

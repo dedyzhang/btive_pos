@@ -2017,10 +2017,34 @@
                     </button>
                 </div>
                 <div class="space-y-3">
-                    @forelse($monthlyIncomeByCategory as $cat => $total)
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
-                        <span class="text-sm font-semibold text-gray-700">{{ $cat }}</span>
-                        <span class="text-sm font-bold text-emerald-600">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                    @forelse($monthlyIncomeByCategory as $cat => $data)
+                    <div class="rounded-xl border border-gray-100 overflow-hidden bg-gray-50">
+                        <!-- Header -->
+                        <div class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-100 transition-colors" onclick="$(this).next().slideToggle(200); $(this).find('i').toggleClass('rotate-180');">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-700">{{ $cat }}</span>
+                                <i class="fas fa-chevron-down text-gray-400 text-[10px] transition-transform duration-200"></i>
+                            </div>
+                            <span class="text-sm font-bold text-emerald-600">Rp {{ number_format($data['total'], 0, ',', '.') }}</span>
+                        </div>
+                        <!-- Details -->
+                        <div class="hidden bg-white border-t border-gray-100 px-3 py-2 max-h-48 overflow-y-auto custom-scrollbar">
+                            @if(count($data['transactions']) > 0)
+                                <ul class="divide-y divide-gray-50">
+                                @foreach($data['transactions'] as $trx)
+                                    <li class="py-2 flex justify-between items-start gap-3">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-medium text-gray-700 leading-tight">{{ $trx->description ?: 'Tanpa keterangan' }}</span>
+                                            <span class="text-[10px] text-gray-400 mt-0.5">{{ date('d M Y', strtotime($trx->transaction_date)) }}</span>
+                                        </div>
+                                        <span class="text-xs font-bold text-emerald-500 shrink-0">Rp {{ number_format($trx->amount, 0, ',', '.') }}</span>
+                                    </li>
+                                @endforeach
+                                </ul>
+                            @else
+                                <p class="text-[10px] text-gray-400 py-1">Tidak ada rincian</p>
+                            @endif
+                        </div>
                     </div>
                     @empty
                     <div class="text-center py-4 text-gray-400 text-sm">Tidak ada data pemasukan bulan ini</div>
@@ -2048,10 +2072,34 @@
                     </button>
                 </div>
                 <div class="space-y-3">
-                    @forelse($monthlyExpenseByCategory as $cat => $total)
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
-                        <span class="text-sm font-semibold text-gray-700">{{ $cat }}</span>
-                        <span class="text-sm font-bold text-rose-600">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                    @forelse($monthlyExpenseByCategory as $cat => $data)
+                    <div class="rounded-xl border border-gray-100 overflow-hidden bg-gray-50">
+                        <!-- Header -->
+                        <div class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-100 transition-colors" onclick="$(this).next().slideToggle(200); $(this).find('i').toggleClass('rotate-180');">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-700">{{ $cat }}</span>
+                                <i class="fas fa-chevron-down text-gray-400 text-[10px] transition-transform duration-200"></i>
+                            </div>
+                            <span class="text-sm font-bold text-rose-600">Rp {{ number_format($data['total'], 0, ',', '.') }}</span>
+                        </div>
+                        <!-- Details -->
+                        <div class="hidden bg-white border-t border-gray-100 px-3 py-2 max-h-48 overflow-y-auto custom-scrollbar">
+                            @if(count($data['transactions']) > 0)
+                                <ul class="divide-y divide-gray-50">
+                                @foreach($data['transactions'] as $trx)
+                                    <li class="py-2 flex justify-between items-start gap-3">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-medium text-gray-700 leading-tight">{{ $trx->description ?: 'Tanpa keterangan' }}</span>
+                                            <span class="text-[10px] text-gray-400 mt-0.5">{{ date('d M Y', strtotime($trx->transaction_date)) }}</span>
+                                        </div>
+                                        <span class="text-xs font-bold text-rose-500 shrink-0">Rp {{ number_format($trx->amount, 0, ',', '.') }}</span>
+                                    </li>
+                                @endforeach
+                                </ul>
+                            @else
+                                <p class="text-[10px] text-gray-400 py-1">Tidak ada rincian</p>
+                            @endif
+                        </div>
                     </div>
                     @empty
                     <div class="text-center py-4 text-gray-400 text-sm">Tidak ada data pengeluaran bulan ini</div>
